@@ -1,23 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchHello } from "../services/helloService";
 
 const HelloMessage: React.FC = () => {
-  const [message, setMessage] = useState<string>("Loading...");
-  const [error, setError] = useState<string | null>(null);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["hello"],
+    queryFn: fetchHello,
+  });
 
-  useEffect(() => {
-    fetchHello()
-      .then((data) => setMessage(data.message))
-      .catch((err) => {
-        console.error(err);
-        setError("Something went wrong");
-      });
-  }, []);
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Something went wrong</p>;
 
   return (
     <div>
       <h2>Hello from Backend:</h2>
-      <p>{error || message}</p>
+      <p>{data?.message}</p>
     </div>
   );
 };
