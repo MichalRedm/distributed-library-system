@@ -1,10 +1,12 @@
+import HelloMessage from "./components/HelloMessage";
 import "./App.scss";
 
 function App() {
   return (
-    <>
-      <h1>Hello world</h1>
-    </>
+    <div className="App">
+      <h1>My Big Data Project</h1>
+      <HelloMessage />
+    </div>
   );
 }
 
