@@ -2,8 +2,9 @@
 
 **A fault-tolerant, scalable reservation platform for managing library resources, built with modern web technologies and a distributed Cassandra backend.**
 
+[![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![Backend Python Application](https://github.com/MichalRedm/bigdata-distributed-app/actions/workflows/python-app.yml/badge.svg)](https://github.com/MichalRedm/bigdata-distributed-app/actions/workflows/python-app.yml)
-![Architecture Diagram](https://img.shields.io/badge/Backend-Python%20%7C%20Tornado-blue?logo=python)
+![Backend](https://img.shields.io/badge/Backend-Python%20%7C%20Tornado-blue?logo=python)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%7C%20TypeScript-blueviolet?logo=react)
 ![Database](https://img.shields.io/badge/Database-Cassandra-orange?logo=apachecassandra)
 ![Deployment](https://img.shields.io/badge/Distributed-Yes-green)
