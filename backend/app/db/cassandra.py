@@ -11,7 +11,6 @@ async def init_cassandra():
     print("Connected to Cassandra")
 
 async def close_cassandra():
-    global cluster
     if cluster:
         cluster.shutdown()
         print("Cassandra connection closed")
