@@ -53,8 +53,8 @@ Built as a **two-node distributed application** to fulfill course requirements f
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/bigdata-distributed-app.git
-cd bigdata-distributed-app
+git clone https://github.com/MichalRedm/distributed-library-system.git
+cd distributed-library-system
 ```
 
 2. **Install frontend dependencies:**
