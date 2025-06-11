@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchHello } from "../services/helloService";
+import { fetchHello } from "../../services/helloService";
 
 const HelloMessage: React.FC = () => {
   const { data, error, isLoading } = useQuery({

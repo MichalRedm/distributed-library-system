@@ -1,11 +1,12 @@
-import HelloMessage from "./components/HelloMessage";
 import "./App.scss";
+import User from "./components/User";
+import UserList from "./components/UserList";
 
 function App() {
   return (
     <div className="App">
-      <h1>My Big Data Project</h1>
-      <HelloMessage />
+      <UserList />
+      <User />
     </div>
   );
 }
