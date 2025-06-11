@@ -5,7 +5,7 @@ services:
     container_name: cas1
     hostname: cas1
     environment:
-      - "MAX_HEAP_SIZE=1G"
+      - "MAX_HEAP_SIZE=512M"
       - "HEAP_NEWSIZE=256M"
     ports:
       - 127.0.0.1:9042:9042
@@ -15,7 +15,7 @@ services:
     container_name: cas2
     hostname: cas2
     environment:
-      - "MAX_HEAP_SIZE=1G"
+      - "MAX_HEAP_SIZE=512M"
       - "HEAP_NEWSIZE=256M"
       - "CASSANDRA_SEEDS=cas1"
     ports:
@@ -28,7 +28,7 @@ services:
     container_name: cas3
     hostname: cas3
     environment:
-      - "MAX_HEAP_SIZE=1G"
+      - "MAX_HEAP_SIZE=512M"
       - "HEAP_NEWSIZE=256M"
       - "CASSANDRA_SEEDS=cas2"
     ports:

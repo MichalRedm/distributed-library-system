@@ -1,14 +1,28 @@
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
+import logging
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 cluster = None
 session = None
+executor = ThreadPoolExecutor(max_workers=10)
+
+logger = logging.getLogger(__name__)
 
 async def init_cassandra():
     global cluster, session
-    cluster = Cluster(['127.0.0.2', '127.0.0.3'])  # add more IPs for multiple nodes
-    session = cluster.connect('data')
-    print("Connected to Cassandra")
+    try:
+        cluster = Cluster(['127.0.0.1', '127.0.0.2', '127.0.0.3'])  # add more IPs for multiple nodes
+        session = cluster.connect('data')
+        
+        # Create tables if they don't exist
+        await create_tables()
+        
+        print("Connected to Cassandra and tables initialized")
+    except Exception as e:
+        logger.error(f"Failed to connect to Cassandra: {e}")
+        raise
 
 async def close_cassandra():
     if cluster:
@@ -17,3 +31,81 @@ async def close_cassandra():
 
 def get_session():
     return session
+
+async def execute_async(query, parameters=None):
+    """Execute Cassandra query asynchronously"""
+    loop = asyncio.get_event_loop()
+    try:
+        if parameters:
+            result = await loop.run_in_executor(executor, session.execute, query, parameters)
+        else:
+            result = await loop.run_in_executor(executor, session.execute, query)
+        return result
+    except Exception as e:
+        logger.error(f"Database query failed: {e}")
+        raise
+
+async def create_tables():
+    """Create all necessary tables"""
+    tables = [
+        """
+        CREATE TABLE IF NOT EXISTS reservations (
+            reservation_id UUID PRIMARY KEY,
+            user_id UUID,
+            book_id UUID,
+            user_name TEXT,
+            book_title TEXT,
+            status TEXT,
+            reservation_date TIMESTAMP,
+            return_deadline TIMESTAMP,
+            created_at TIMESTAMP,
+            updated_at TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS reservations_by_user (
+            user_id UUID,
+            reservation_id UUID,
+            book_id UUID,
+            book_title TEXT,
+            status TEXT,
+            reservation_date TIMESTAMP,
+            return_deadline TIMESTAMP,
+            PRIMARY KEY (user_id, reservation_id)
+        ) WITH CLUSTERING ORDER BY (reservation_id DESC)
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS reservations_by_book (
+            book_id UUID,
+            reservation_id UUID,
+            user_id UUID,
+            user_name TEXT,
+            status TEXT,
+            reservation_date TIMESTAMP,
+            return_deadline TIMESTAMP,
+            PRIMARY KEY (book_id, reservation_id)
+        ) WITH CLUSTERING ORDER BY (reservation_id DESC)
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS books (
+            book_id UUID PRIMARY KEY,
+            title TEXT,
+            status TEXT,
+            created_at TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            user_id UUID PRIMARY KEY,
+            username TEXT,
+            created_at TIMESTAMP
+        )
+        """
+    ]
+    
+    for table_query in tables:
+        try:
+            await execute_async(table_query)
+        except Exception as e:
+            logger.error(f"Failed to create table: {e}")
+            raise
