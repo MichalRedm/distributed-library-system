@@ -9,13 +9,13 @@ from db.cassandra import init_cassandra, close_cassandra
 PORT = int(os.environ.get("PORT", 8000))
 
 
-def make_app():
+def make_app() -> tornado.web.Application:
     return tornado.web.Application([
         (r"/api/hello", HelloHandler),
     ], debug=True)
 
 
-async def main():
+async def main() -> None:
     await init_cassandra()
 
     app = make_app()
