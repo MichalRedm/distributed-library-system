@@ -1,9 +1,22 @@
-const User: React.FC = () => {
+import { useEffect } from "react";
+
+interface UserProps {
+  id: number | null;
+}
+
+const User: React.FC<UserProps> = ({ id }) => {
+  useEffect(() => {
+    console.log("Loading user with ID:", id);
+  }, [id]);
+
   return (
     <div className="user">
       <h2>User Profile</h2>
-      <p>This component will display user profile information.</p>
-      {/* User profile implementation will go here */}
+      {id === null ? (
+        <p>Please select a user to view their profile.</p>
+      ) : (
+        <p>User ID: {id}</p>
+      )}
     </div>
   );
 };
