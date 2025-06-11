@@ -3,8 +3,12 @@ name: Backend Python Application
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - 'backend/**'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - 'backend/**'
 
 permissions:
   contents: read
@@ -32,15 +36,12 @@ jobs:
     - name: Lint with flake8
       working-directory: backend
       run: |
-        # Stop the build if there are Python syntax errors or undefined names
         flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
         flake8 app --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Run mypy
       working-directory: backend
       run: |
-        # Run mypy to check type annotations
         mypy .
 
     # - name: Test with pytest
