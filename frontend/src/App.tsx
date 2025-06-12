@@ -41,7 +41,14 @@ function App() {
           <BookList onSelectBook={handleSelectBookId} />
         )}
       </div>
-      <User id={selectedUserId} />
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <User id={selectedUserId} />
+        {selectedBookId && (
+          <div className="book-details">
+            <h2>Selected Book ID: {selectedBookId}</h2>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
