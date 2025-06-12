@@ -8,10 +8,11 @@ Usage: python create_sample_data.py
 
 import asyncio
 import aiohttp
-import json
-import uuid
+# import json
+# import uuid
 
 API_BASE = "http://localhost:8000/api"
+
 
 async def create_sample_data():
     """Create sample users and books for testing"""
@@ -27,14 +28,16 @@ async def create_sample_data():
             {"username": "david_brown"},
             {"username": "emma_davis"}
         ]
-        
+
         user_ids = []
         print("\nCreating users...")
         for user_data in users:
             try:
-                async with session.post(f"{API_BASE}/users", 
-                                      json=user_data,
-                                      headers={"Content-Type": "application/json"}) as resp:
+                async with session.post(
+                    f"{API_BASE}/users",
+                    json=user_data,
+                    headers={"Content-Type": "application/json"}
+                ) as resp:
                     if resp.status == 201:
                         result = await resp.json()
                         user_ids.append(result['user_id'])
@@ -44,7 +47,7 @@ async def create_sample_data():
                         print(f"✗ Failed to create user {user_data['username']}: {error}")
             except Exception as e:
                 print(f"✗ Error creating user {user_data['username']}: {e}")
-        
+
         # Sample books
         books = [
             {"title": "The Great Gatsby"},
@@ -63,9 +66,11 @@ async def create_sample_data():
         print("\nCreating books...")
         for book_data in books:
             try:
-                async with session.post(f"{API_BASE}/books",
-                                      json=book_data,
-                                      headers={"Content-Type": "application/json"}) as resp:
+                async with session.post(
+                    f"{API_BASE}/books",
+                    json=book_data,
+                    headers={"Content-Type": "application/json"}
+                ) as resp:
                     if resp.status == 201:
                         result = await resp.json()
                         book_ids.append(result['book_id'])
