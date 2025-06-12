@@ -113,6 +113,19 @@ async def create_tables():
         ) WITH CLUSTERING ORDER BY (reservation_id DESC)
         """,
         """
+        CREATE TABLE IF NOT EXISTS reservations_user_book (
+            user_id UUID,
+            book_id UUID,
+            reservation_id UUID,
+            user_name TEXT,
+            book_title TEXT,
+            reservation_date TIMESTAMP,
+            return_deadline TIMESTAMP,
+            created_at TIMESTAMP,
+            PRIMARY KEY (user_id, book_id)
+        )
+        """,
+        """
         CREATE TABLE IF NOT EXISTS books (
             book_id UUID PRIMARY KEY,
             title TEXT,

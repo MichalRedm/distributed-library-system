@@ -75,10 +75,10 @@ class ReservationHandler(BaseHandler):
                 self.write({"error": "Book is not available for reservation"})
                 return
             
-            # Check if user already has an active reservation for this book
+            # Check if user already has an active reservation for this book using the new table
             existing_reservation_query = """
-                SELECT reservation_id FROM reservations_by_user 
-                WHERE user_id = %s AND book_id = %s AND status = 'active'
+                SELECT reservation_id FROM reservations_user_book 
+                WHERE user_id = %s AND book_id = %s
             """
             existing_result = await execute_async(existing_reservation_query, (user_id, book_id))
             if existing_result:
@@ -90,20 +90,6 @@ class ReservationHandler(BaseHandler):
             reservation_id = uuid.uuid4()
             now = datetime.utcnow()
             return_deadline = now + timedelta(days=14)  # 2 weeks default
-            
-            # Insert into all three tables
-            reservation_data = {
-                'reservation_id': reservation_id,
-                'user_id': user_id,
-                'book_id': book_id,
-                'user_name': user_name,
-                'book_title': book_title,
-                'status': 'active',
-                'reservation_date': now,
-                'return_deadline': return_deadline,
-                'created_at': now,
-                'updated_at': now
-            }
             
             # Insert into main reservations table
             insert_reservation = """
@@ -126,6 +112,13 @@ class ReservationHandler(BaseHandler):
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             
+            # Insert into reservations_user_book table (only active reservations)
+            insert_user_book = """
+                INSERT INTO reservations_user_book (user_id, book_id, reservation_id, user_name, book_title,
+                                                   reservation_date, return_deadline, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            
             # Update book status
             update_book = "UPDATE books SET status = 'checked_out' WHERE book_id = %s"
             
@@ -143,6 +136,11 @@ class ReservationHandler(BaseHandler):
             await execute_async(insert_by_book, (
                 book_id, reservation_id, user_id, user_name,
                 'active', now, return_deadline
+            ))
+            
+            await execute_async(insert_user_book, (
+                user_id, book_id, reservation_id, user_name, book_title,
+                now, return_deadline, now
             ))
             
             await execute_async(update_book, (book_id,))
@@ -271,10 +269,18 @@ class ReservationDetailHandler(BaseHandler):
                 update_by_book = "UPDATE reservations_by_book SET status = %s WHERE book_id = %s AND reservation_id = %s"
                 await execute_async(update_by_book, (updates['status'], reservation.book_id, reservation_uuid))
                 
-                # If marking as completed, make book available again
+                # If marking as completed, remove from active reservations table and make book available
                 if updates['status'] == 'completed':
+                    delete_active = "DELETE FROM reservations_user_book WHERE user_id = %s AND book_id = %s"
+                    await execute_async(delete_active, (reservation.user_id, reservation.book_id))
+                    
                     update_book = "UPDATE books SET status = 'available' WHERE book_id = %s"
                     await execute_async(update_book, (reservation.book_id,))
+            
+            # If updating return_deadline and reservation is still active, update the active table too
+            if 'return_deadline' in updates and reservation.status == 'active':
+                update_active_deadline = "UPDATE reservations_user_book SET return_deadline = %s WHERE user_id = %s AND book_id = %s"
+                await execute_async(update_active_deadline, (updates['return_deadline'], reservation.user_id, reservation.book_id))
             
             # Return updated reservation
             updated_reservation = await execute_async(query, (reservation_uuid,))
@@ -331,8 +337,6 @@ class BulkReservationHandler(BaseHandler):
                     return
             
             # Fetch all reservations to cancel
-            query = "SELECT * FROM reservations WHERE reservation_id IN %s"
-            # For Cassandra, we need to query each reservation individually
             reservations_to_cancel = []
             for res_uuid in reservation_uuids:
                 single_query = "SELECT * FROM reservations WHERE reservation_id = %s"
@@ -361,6 +365,10 @@ class BulkReservationHandler(BaseHandler):
                     
                     update_by_book = "UPDATE reservations_by_book SET status = 'completed' WHERE book_id = %s AND reservation_id = %s"
                     await execute_async(update_by_book, (reservation.book_id, reservation.reservation_id))
+                    
+                    # Remove from active reservations table
+                    delete_active = "DELETE FROM reservations_user_book WHERE user_id = %s AND book_id = %s"
+                    await execute_async(delete_active, (reservation.user_id, reservation.book_id))
                     
                     # Make book available again
                     update_book = "UPDATE books SET status = 'available' WHERE book_id = %s"
