@@ -50,7 +50,7 @@ class ReservationHandler(BaseHandler):
             book_id = uuid.UUID(data['book_id'])
             
             # Check if user exists
-            user_query = "SELECT username FROM users WHERE user_id = ?"
+            user_query = "SELECT username FROM users WHERE user_id = %s"
             user_result = await execute_async(user_query, (user_id,))
             if not user_result:
                 self.set_status(404)
@@ -60,7 +60,7 @@ class ReservationHandler(BaseHandler):
             user_name = user_result[0].username
             
             # Check if book exists and is available
-            book_query = "SELECT title, status FROM books WHERE book_id = ?"
+            book_query = "SELECT title, status FROM books WHERE book_id = %s"
             book_result = await execute_async(book_query, (book_id,))
             if not book_result:
                 self.set_status(404)
@@ -78,7 +78,7 @@ class ReservationHandler(BaseHandler):
             # Check if user already has an active reservation for this book
             existing_reservation_query = """
                 SELECT reservation_id FROM reservations_by_user 
-                WHERE user_id = ? AND book_id = ? AND status = 'active'
+                WHERE user_id = %s AND book_id = %s AND status = 'active'
             """
             existing_result = await execute_async(existing_reservation_query, (user_id, book_id))
             if existing_result:
@@ -109,25 +109,25 @@ class ReservationHandler(BaseHandler):
             insert_reservation = """
                 INSERT INTO reservations (reservation_id, user_id, book_id, user_name, book_title, 
                                         status, reservation_date, return_deadline, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             # Insert into reservations_by_user table
             insert_by_user = """
                 INSERT INTO reservations_by_user (user_id, reservation_id, book_id, book_title, 
                                                  status, reservation_date, return_deadline)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             
             # Insert into reservations_by_book table
             insert_by_book = """
                 INSERT INTO reservations_by_book (book_id, reservation_id, user_id, user_name, 
                                                  status, reservation_date, return_deadline)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             
             # Update book status
-            update_book = "UPDATE books SET status = 'checked_out' WHERE book_id = ?"
+            update_book = "UPDATE books SET status = 'checked_out' WHERE book_id = %s"
             
             # Execute all queries
             await execute_async(insert_reservation, (
@@ -178,7 +178,7 @@ class ReservationDetailHandler(BaseHandler):
         try:
             reservation_uuid = uuid.UUID(reservation_id)
             
-            query = "SELECT * FROM reservations WHERE reservation_id = ?"
+            query = "SELECT * FROM reservations WHERE reservation_id = %s"
             result = await execute_async(query, (reservation_uuid,))
             
             if not result:
@@ -215,7 +215,7 @@ class ReservationDetailHandler(BaseHandler):
             data = json.loads(self.request.body)
             
             # Check if reservation exists
-            query = "SELECT * FROM reservations WHERE reservation_id = ?"
+            query = "SELECT * FROM reservations WHERE reservation_id = %s"
             result = await execute_async(query, (reservation_uuid,))
             
             if not result:
@@ -253,27 +253,27 @@ class ReservationDetailHandler(BaseHandler):
             update_values = []
             
             for field, value in updates.items():
-                update_fields.append(f"{field} = ?")
+                update_fields.append(f"{field} = %s")
                 update_values.append(value)
             
-            update_fields.append("updated_at = ?")
+            update_fields.append("updated_at = %s")
             update_values.append(now)
             update_values.append(reservation_uuid)
             
-            update_query = f"UPDATE reservations SET {', '.join(update_fields)} WHERE reservation_id = ?"
+            update_query = f"UPDATE reservations SET {', '.join(update_fields)} WHERE reservation_id = %s"
             await execute_async(update_query, update_values)
             
             # Update denormalized tables if status changed
             if 'status' in updates:
-                update_by_user = "UPDATE reservations_by_user SET status = ? WHERE user_id = ? AND reservation_id = ?"
+                update_by_user = "UPDATE reservations_by_user SET status = %s WHERE user_id = %s AND reservation_id = %s"
                 await execute_async(update_by_user, (updates['status'], reservation.user_id, reservation_uuid))
                 
-                update_by_book = "UPDATE reservations_by_book SET status = ? WHERE book_id = ? AND reservation_id = ?"
+                update_by_book = "UPDATE reservations_by_book SET status = %s WHERE book_id = %s AND reservation_id = %s"
                 await execute_async(update_by_book, (updates['status'], reservation.book_id, reservation_uuid))
                 
                 # If marking as completed, make book available again
                 if updates['status'] == 'completed':
-                    update_book = "UPDATE books SET status = 'available' WHERE book_id = ?"
+                    update_book = "UPDATE books SET status = 'available' WHERE book_id = %s"
                     await execute_async(update_book, (reservation.book_id,))
             
             # Return updated reservation
@@ -331,11 +331,11 @@ class BulkReservationHandler(BaseHandler):
                     return
             
             # Fetch all reservations to cancel
-            query = "SELECT * FROM reservations WHERE reservation_id IN ?"
+            query = "SELECT * FROM reservations WHERE reservation_id IN %s"
             # For Cassandra, we need to query each reservation individually
             reservations_to_cancel = []
             for res_uuid in reservation_uuids:
-                single_query = "SELECT * FROM reservations WHERE reservation_id = ?"
+                single_query = "SELECT * FROM reservations WHERE reservation_id = %s"
                 result = await execute_async(single_query, (res_uuid,))
                 if result:
                     reservations_to_cancel.extend(result)
@@ -352,18 +352,18 @@ class BulkReservationHandler(BaseHandler):
             for reservation in reservations_to_cancel:
                 if reservation.status == 'active':
                     # Update main reservation
-                    update_main = "UPDATE reservations SET status = 'completed', updated_at = ? WHERE reservation_id = ?"
+                    update_main = "UPDATE reservations SET status = 'completed', updated_at = %s WHERE reservation_id = %s"
                     await execute_async(update_main, (now, reservation.reservation_id))
                     
                     # Update denormalized tables
-                    update_by_user = "UPDATE reservations_by_user SET status = 'completed' WHERE user_id = ? AND reservation_id = ?"
+                    update_by_user = "UPDATE reservations_by_user SET status = 'completed' WHERE user_id = %s AND reservation_id = %s"
                     await execute_async(update_by_user, (reservation.user_id, reservation.reservation_id))
                     
-                    update_by_book = "UPDATE reservations_by_book SET status = 'completed' WHERE book_id = ? AND reservation_id = ?"
+                    update_by_book = "UPDATE reservations_by_book SET status = 'completed' WHERE book_id = %s AND reservation_id = %s"
                     await execute_async(update_by_book, (reservation.book_id, reservation.reservation_id))
                     
                     # Make book available again
-                    update_book = "UPDATE books SET status = 'available' WHERE book_id = ?"
+                    update_book = "UPDATE books SET status = 'available' WHERE book_id = %s"
                     await execute_async(update_book, (reservation.book_id,))
                     
                     cancelled_count += 1

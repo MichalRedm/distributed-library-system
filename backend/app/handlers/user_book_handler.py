@@ -36,7 +36,7 @@ class UserReservationsHandler(BaseHandler):
         try:
             user_uuid = uuid.UUID(user_id)
             
-            query = "SELECT * FROM reservations_by_user WHERE user_id = ?"
+            query = "SELECT * FROM reservations_by_user WHERE user_id = %s"
             result = await execute_async(query, (user_uuid,))
             
             reservations = []
@@ -71,7 +71,7 @@ class BookReservationsHandler(BaseHandler):
         try:
             book_uuid = uuid.UUID(book_id)
             
-            query = "SELECT * FROM reservations_by_book WHERE book_id = ?"
+            query = "SELECT * FROM reservations_by_book WHERE book_id = %s"
             result = await execute_async(query, (book_uuid,))
             
             reservations = []
@@ -107,7 +107,7 @@ class BookHandler(BaseHandler):
             if book_id:
                 # Get specific book
                 book_uuid = uuid.UUID(book_id)
-                query = "SELECT * FROM books WHERE book_id = ?"
+                query = "SELECT * FROM books WHERE book_id = %s"
                 result = await execute_async(query, (book_uuid,))
                 
                 if not result:
@@ -172,7 +172,7 @@ class BookHandler(BaseHandler):
             
             query = """
                 INSERT INTO books (book_id, title, status, created_at)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             """
             
             await execute_async(query, (book_id, data['title'], 'available', now))
@@ -200,7 +200,7 @@ class BookAvailabilityHandler(BaseHandler):
             book_uuid = uuid.UUID(book_id)
             
             # Get book info
-            book_query = "SELECT * FROM books WHERE book_id = ?"
+            book_query = "SELECT * FROM books WHERE book_id = %s"
             book_result = await execute_async(book_query, (book_uuid,))
             
             if not book_result:
@@ -213,7 +213,7 @@ class BookAvailabilityHandler(BaseHandler):
             # Get active reservations for this book
             reservations_query = """
                 SELECT * FROM reservations_by_book 
-                WHERE book_id = ? AND status = 'active'
+                WHERE book_id = %s AND status = 'active'
             """
             reservations_result = await execute_async(reservations_query, (book_uuid,))
             
@@ -259,7 +259,7 @@ class UserHandler(BaseHandler):
             
             # Check if username already exists (this requires ALLOW FILTERING in Cassandra)
             # In production, consider using a separate table for username lookups
-            check_query = "SELECT user_id FROM users WHERE username = ? ALLOW FILTERING"
+            check_query = "SELECT user_id FROM users WHERE username = %s ALLOW FILTERING"
             existing_result = await execute_async(check_query, (data['username'],))
             
             if existing_result:
@@ -272,7 +272,7 @@ class UserHandler(BaseHandler):
             
             query = """
                 INSERT INTO users (user_id, username, created_at)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """
             
             await execute_async(query, (user_id, data['username'], now))
@@ -302,7 +302,7 @@ class UserHandler(BaseHandler):
                 
             user_uuid = uuid.UUID(user_id)
             
-            query = "SELECT * FROM users WHERE user_id = ?"
+            query = "SELECT * FROM users WHERE user_id = %s"
             result = await execute_async(query, (user_uuid,))
             
             if not result:
