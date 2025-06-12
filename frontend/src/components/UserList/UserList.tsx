@@ -18,12 +18,12 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
   if (error) return <p>Error loading users: {error.message}</p>;
 
   const filteredUsers = users?.filter(user =>
-    user.name.toLowerCase().includes(searchInput.toLowerCase())
+    user.username.toLowerCase().includes(searchInput.toLowerCase())
   ) || [];
 
   return (
     <div className="user-list">
-      <h2>User List</h2>
+      <h2>Users</h2>
       <input
         type="text"
         placeholder="Search users..."
@@ -39,7 +39,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
             className="user-list__item"
             onClick={() => onSelectUser(user.id)}
           >
-            {user.name}
+            {user.username}
           </li>
         ))}
       </ul>

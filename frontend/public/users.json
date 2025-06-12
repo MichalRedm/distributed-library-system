@@ -1,22 +1,22 @@
 [
   {
     "id": 1,
-    "name": "Alice Smith"
+    "username": "Alice Smith"
   },
   {
     "id": 2,
-    "name": "Bob Johnson"
+    "username": "Bob Johnson"
   },
   {
     "id": 3,
-    "name": "Charlie Brown"
+    "username": "Charlie Brown"
   },
   {
     "id": 4,
-    "name": "Diana Prince"
+    "username": "Diana Prince"
   },
   {
     "id": 5,
-    "name": "Ethan Hunt"
+    "username": "Ethan Hunt"
   }
 ]
