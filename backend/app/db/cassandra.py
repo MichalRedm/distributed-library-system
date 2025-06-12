@@ -21,8 +21,20 @@ async def init_cassandra():
             load_balancing_policy=DCAwareRoundRobinPolicy(),
             protocol_version=5
         )
-        session = cluster.connect('data')
 
+        session = cluster.connect()
+        keyspace_query = """
+        CREATE KEYSPACE IF NOT EXISTS data
+        WITH REPLICATION = {
+            'class': 'SimpleStrategy',
+            'replication_factor': 2
+        }
+        """
+        session.execute(keyspace_query)
+
+        print("✓ Keyspace 'data' created successfully")
+        session = cluster.connect('data')
+        
         # Create tables if they don't exist
         await create_tables()
 
