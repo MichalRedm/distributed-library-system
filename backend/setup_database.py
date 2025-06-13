@@ -9,8 +9,8 @@ Usage: python setup_database.py
 Make sure Cassandra is running before executing this script.
 """
 
-from cassandra.cluster import Cluster
-from cassandra.policies import DCAwareRoundRobinPolicy
+from cassandra.cluster import Cluster  # type: ignore
+from cassandra.policies import DCAwareRoundRobinPolicy  # type: ignore
 import sys
 import time
 

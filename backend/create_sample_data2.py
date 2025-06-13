@@ -1,4 +1,4 @@
-import requests
+import requests  # type: ignore
 import uuid
 
 API_BASE = "http://localhost:8000/api"

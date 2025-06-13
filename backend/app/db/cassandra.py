@@ -1,5 +1,5 @@
-from cassandra.cluster import Cluster
-from cassandra.policies import DCAwareRoundRobinPolicy
+from cassandra.cluster import Cluster  # type: ignore
+from cassandra.policies import DCAwareRoundRobinPolicy  # type: ignore
 import logging
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
