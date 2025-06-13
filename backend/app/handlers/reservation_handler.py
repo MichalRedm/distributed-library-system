@@ -18,7 +18,7 @@ class BaseHandler(tornado.web.RequestHandler):
         )
         self.set_header("Content-Type", "application/json")
 
-    def options(self):
+    def options(self, *args, **kwargs):
         self.set_status(204)
         self.finish()
 
