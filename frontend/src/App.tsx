@@ -115,10 +115,9 @@ function App() {
             <Book id={selectedBookId} />
 
             {/* Create Reservation Section */}
-            <div className="bg-neutral-800 shadow-lg rounded-lg p-6 flex flex-col items-center">
-              <h2 className="text-xl font-semibold mb-4 text-neutral-200">Create New Reservation</h2>
+            <div className="flex flex-col items-center">
               <button
-                className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 ease-in-out
+                className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 ease-in-out w-full
                   ${!isCheckoutDisabled
                     ? "bg-green-600 text-white hover:bg-green-700 shadow-lg transform hover:scale-105"
                     : "bg-neutral-600 text-neutral-400 cursor-not-allowed"
