@@ -4,31 +4,34 @@ import User from "./components/User";
 import UserList from "./components/UserList";
 import BookList from "./components/BookList";
 import Book from "./components/Book";
-import { createReservation } from "./services/reservationService"; // Import the createReservation function
-import { useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
+import { createReservation } from "./services/reservationService";
+import { fetchBookById } from "./services/bookService"; // Import fetchBookById
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 function App() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [tab, setTab] = useState<"users" | "books">("users");
   const [isCreatingReservation, setIsCreatingReservation] = useState<boolean>(false);
-  const [reservationMessage, setReservationMessage] = useState<string | null>(null);
-  const [isError, setIsError] = useState<boolean>(false);
 
-  const queryClient = useQueryClient(); // Initialize useQueryClient
+  const queryClient = useQueryClient();
+
+  // Fetch full book data for the currently selected book to get its status
+  const { data: selectedBookData, isLoading: isBookDataLoading } = useQuery({
+    queryKey: ["book", selectedBookId], // Use the same query key as the Book component
+    queryFn: () => {
+      if (!selectedBookId) return Promise.reject("No book ID provided");
+      return fetchBookById(selectedBookId);
+    },
+    enabled: !!selectedBookId, // Only run this query if a book is selected
+  });
 
   const handleSelectUserId = (userId: string) => {
     setSelectedUserId(userId);
-    // Reset messages when a new user is selected
-    setReservationMessage(null);
-    setIsError(false);
   };
 
   const handleSelectBookId = (bookId: string) => {
     setSelectedBookId(bookId);
-    // Reset messages when a new book is selected
-    setReservationMessage(null);
-    setIsError(false);
   };
 
   /**
@@ -37,32 +40,33 @@ function App() {
   const handleCreateReservation = async () => {
     if (selectedUserId && selectedBookId) {
       setIsCreatingReservation(true);
-      setReservationMessage(null);
-      setIsError(false);
       try {
-        const reservation = await createReservation({
+        await createReservation({
           user_id: selectedUserId,
           book_id: selectedBookId,
         });
-        setReservationMessage(`Reservation created successfully! ID: ${reservation.reservation_id}`);
-        setIsError(false);
 
-        // Invalidate the specific user's reservations query
-        // This will cause the User component to refetch its reservations
-        queryClient.invalidateQueries({ queryKey: ["user-reservations", selectedUserId] });
-
-        // Do NOT reset selected user/book here, as requested
-        // setSelectedUserId(null);
-        // setSelectedBookId(null);
+        // Invalidate queries to trigger re-fetches for relevant data
+        queryClient.invalidateQueries({ queryKey: ["user-reservations", selectedUserId] }); // Update user's reservations
+        queryClient.invalidateQueries({ queryKey: ["book", selectedBookId] }); // Update book status in Book component and selectedBookData here
+        queryClient.invalidateQueries({ queryKey: ["books"] }); // Update book list if filtering by availability
       } catch (error) {
         console.error("Failed to create reservation:", error);
-        setReservationMessage("Failed to create reservation. Please try again.");
-        setIsError(true);
+        alert("Failed to create reservation. Please try again.");
       } finally {
         setIsCreatingReservation(false);
       }
     }
   };
+
+  // Determine if the checkout button should be disabled
+  const isCheckoutDisabled =
+    !selectedUserId ||
+    !selectedBookId ||
+    isCreatingReservation ||
+    isBookDataLoading || // Disable if book data is still loading
+    (selectedBookData?.status === 'checked_out'); // Disable if the selected book is checked out
+
 
   return (
     <div className="App flex flex-col items-center p-4 min-h-screen bg-neutral-900 font-sans text-neutral-300">
@@ -78,8 +82,6 @@ function App() {
                   ${tab === "users" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
                 onClick={() => {
                   setTab("users");
-                  setReservationMessage(null);
-                  setIsError(false);
                 }}
               >
                 Users
@@ -89,8 +91,6 @@ function App() {
                   ${tab === "books" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
                 onClick={() => {
                   setTab("books");
-                  setReservationMessage(null);
-                  setIsError(false);
                 }}
               >
                 Books
@@ -109,36 +109,29 @@ function App() {
           {/* Right Column: Selected User/Book Details and Create Reservation */}
           <div className="flex flex-col gap-6">
             {/* Selected User Details */}
-            <div className="bg-neutral-800 shadow-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-3 text-neutral-200">Selected User:</h2>
-              <User id={selectedUserId} />
-            </div>
+            <User id={selectedUserId} />
 
             {/* Selected Book Details */}
-            <div className="bg-neutral-800 shadow-lg rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-3 text-neutral-200">Selected Book:</h2>
-              <Book id={selectedBookId} />
-            </div>
+            <Book id={selectedBookId} />
 
             {/* Create Reservation Section */}
-            <div className="p-6 flex flex-col items-center">
+            <div className="bg-neutral-800 shadow-lg rounded-lg p-6 flex flex-col items-center">
+              <h2 className="text-xl font-semibold mb-4 text-neutral-200">Create New Reservation</h2>
               <button
                 className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 ease-in-out
-                  ${selectedUserId && selectedBookId && !isCreatingReservation
+                  ${!isCheckoutDisabled
                     ? "bg-green-600 text-white hover:bg-green-700 shadow-lg transform hover:scale-105"
                     : "bg-neutral-600 text-neutral-400 cursor-not-allowed"
                   }`}
                 onClick={handleCreateReservation}
-                disabled={!selectedUserId || !selectedBookId || isCreatingReservation}
+                disabled={isCheckoutDisabled}
               >
-                {isCreatingReservation ? "Checking out..." : "Check out"}
+                {isCreatingReservation
+                  ? "Checking out..."
+                  : selectedBookData?.status === 'checked_out' && selectedBookId // Check status from selectedBookData
+                  ? "Book Not Available"
+                  : "Check out"}
               </button>
-
-              {reservationMessage && (
-                <p className={`mt-4 text-center text-lg ${isError ? "text-red-600" : "text-green-600"}`}>
-                  {reservationMessage}
-                </p>
-              )}
             </div>
           </div>
         </div>
