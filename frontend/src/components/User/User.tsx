@@ -56,9 +56,9 @@ const User: React.FC<UserProps> = ({ id }) => {
       {sortedReservations.length === 0 ? (
         <p>No reservations found.</p>
       ) : (
-        <ul className="list-container__items">
+        <ul className="list-items">
           {sortedReservations.map(reservation => (
-            <li key={reservation.reservation_id} className="list-container__item">
+            <li key={reservation.reservation_id} className="list-item">
               <p><strong>Book:</strong> {reservation.book_title}</p>
               <p><strong>Status:</strong> {reservation.status}</p>
               <p><strong>Reservation Date:</strong> {reservation.reservation_date}</p>
