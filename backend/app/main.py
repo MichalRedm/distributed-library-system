@@ -54,7 +54,6 @@ def make_app() -> tornado.web.Application:
     ], debug=True)
 
 
-<<<<<<< backend-basics
 async def main():
     try:
         await init_cassandra()
@@ -117,10 +116,6 @@ async def main():
         )
         print("✅ Active reservations stored separately for fast lookups")
         print("✅ Complete reservation history preserved")
-=======
-async def main() -> None:
-    await init_cassandra()
->>>>>>> master
 
         await asyncio.Event().wait()
 

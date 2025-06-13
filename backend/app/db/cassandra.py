@@ -1,9 +1,10 @@
-<<<<<<< backend-basics
-from cassandra.cluster import Cluster  # type: ignore
+from typing import Optional
+from cassandra.cluster import Cluster, Session  # type: ignore
 from cassandra.policies import DCAwareRoundRobinPolicy  # type: ignore
 import logging
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+
 
 cluster = None
 session = None
@@ -11,12 +12,6 @@ executor = ThreadPoolExecutor(max_workers=10)
 
 logger = logging.getLogger(__name__)
 
-=======
-from cassandra.cluster import Cluster, Session
-from typing import Optional
-# from cassandra.auth import PlainTextAuthProvider
-
->>>>>>> master
 
 cluster: Optional[Cluster] = None
 session: Optional[Session] = None
@@ -24,7 +19,6 @@ session: Optional[Session] = None
 
 async def init_cassandra() -> None:
     global cluster, session
-<<<<<<< backend-basics
     try:
         cluster = Cluster(
             contact_points=[('127.0.0.1', 9042), ('127.0.0.1', 9043)],
@@ -54,13 +48,6 @@ async def init_cassandra() -> None:
         logger.error(f"Failed to connect to Cassandra: {e}")
         raise
 
-=======
-    # add more IPs for multiple nodes
-    cluster = Cluster(['127.0.0.2', '127.0.0.3'])
-    session = cluster.connect('data')
-    print("Connected to Cassandra")
->>>>>>> master
-
 
 async def close_cassandra() -> None:
     if cluster:
@@ -68,16 +55,12 @@ async def close_cassandra() -> None:
         print("Cassandra connection closed")
 
 
-<<<<<<< backend-basics
-def get_session():
-=======
 def get_session() -> Session:
     if session is None:
         raise RuntimeError(
             "Cassandra session is not initialized. "
             "Call init_cassandra() first."
         )
->>>>>>> master
     return session
 
 

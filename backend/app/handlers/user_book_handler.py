@@ -2,7 +2,7 @@ import tornado.web
 import json
 import uuid
 from datetime import datetime
-from db.cassandra import execute_async
+from db.cassandra import execute_async  # type: ignore
 import logging
 
 logger = logging.getLogger(__name__)
