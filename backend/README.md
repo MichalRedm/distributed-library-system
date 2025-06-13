@@ -280,12 +280,3 @@ Common status codes include:
 * All timestamps use ISO8601 format.
 * CORS is enabled globally (`*`).
 * All endpoints support `OPTIONS` for preflight requests.
-
----
-
-## Future Improvements (Planned)
-
-* Reservation creation and cancellation endpoints
-* Pagination and filtering for large datasets
-* User authentication and authorization
-* Improved validation and error responses
