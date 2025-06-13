@@ -66,7 +66,6 @@ def get_session() -> Session:
 
 async def execute_async(query, parameters=None):
     """Execute Cassandra query asynchronously"""
-    global session
     if session is None:
         raise RuntimeError(
             "Cassandra session is not initialized. "
