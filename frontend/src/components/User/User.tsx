@@ -32,7 +32,6 @@ const User: React.FC<UserProps> = ({ id }) => {
   return (
     <div className="user">
       <h2>User Profile</h2>
-      <p><strong>ID:</strong> {data?.user_id}</p>
       <p><strong>Username:</strong> {data?.username}</p>
       <p><strong>Created At:</strong> {data?.created_at}</p>
       <p><strong>Active Reservations:</strong> {data?.active_reservations_count}</p>

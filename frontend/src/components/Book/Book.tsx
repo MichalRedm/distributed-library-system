@@ -32,7 +32,6 @@ const Book: React.FC<BookProps> = ({ id }) => {
   return (
     <div className="book">
       <h2>Book Details</h2>
-      <p><strong>ID:</strong> {data?.book_id}</p>
       <p><strong>Title:</strong> {data?.title}</p>
       <p><strong>Status:</strong> {data?.status}</p>
       <p><strong>Created At:</strong> {data?.created_at}</p>
