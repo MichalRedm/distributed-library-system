@@ -113,31 +113,6 @@ GET /api/users/{user_id}/active-reservations
 }
 ```
 
-#### Get all reservations for a user
-
-```
-GET /api/users/{user_id}/reservations
-```
-
-**Response**
-
-```json
-{
-  "user_id": "uuid",
-  "reservations": [
-    {
-      "reservation_id": "uuid",
-      "book_id": "uuid",
-      "book_title": "string",
-      "status": "string",
-      "reservation_date": "ISO8601 timestamp",
-      "return_deadline": "ISO8601 timestamp"
-    }
-  ],
-  "total_count": integer
-}
-```
-
 ---
 
 ### Books
@@ -212,31 +187,6 @@ Content-Type: application/json
 }
 ```
 
-#### Get all reservations for a book
-
-```
-GET /api/books/{book_id}/reservations
-```
-
-**Response**
-
-```json
-{
-  "book_id": "uuid",
-  "reservations": [
-    {
-      "reservation_id": "uuid",
-      "user_id": "uuid",
-      "user_name": "string",
-      "status": "string",
-      "reservation_date": "ISO8601 timestamp",
-      "return_deadline": "ISO8601 timestamp"
-    }
-  ],
-  "total_count": integer
-}
-```
-
 #### Check book availability
 
 ```
@@ -254,6 +204,172 @@ GET /api/books/{book_id}/availability
 ```
 
 ---
+
+### Reservations
+
+#### Make a reservation
+
+```
+POST /api/reservations
+Content-Type: application/json
+```
+
+**Request body**
+
+```json
+{
+  "user_id": "uuid",
+  "book_id": "uuid"
+}
+```
+
+**Response (201 Created)**
+
+```json
+{
+  "reservation_id": "uuid",
+  "user_id": "uuid",
+  "book_id": "uuid",
+  "user_name": "string",
+  "book_title": "string",
+  "status": "active",
+  "reservation_date": "ISO8601 timestamp",
+  "return_deadline": "ISO8601 timestamp",
+  "created_at": "ISO8601 timestamp",
+  "updated_at": "ISO8601 timestamp"
+}
+```
+
+#### Get specific reservation
+
+```
+GET /api/reservations/{id}
+```
+
+**Response**
+
+```json
+{
+  "reservation_id": "uuid",
+  "user_id": "uuid",
+  "book_id": "uuid",
+  "user_name": "string",
+  "book_title": "string",
+  "status": "active" | "completed",
+  "reservation_date": "ISO8601 timestamp",
+  "return_deadline": "ISO8601 timestamp",
+  "created_at": "ISO8601 timestamp",
+  "updated_at": "ISO8601 timestamp"
+}
+```
+
+#### Update reservation
+
+```
+PUT /api/reservations/{id}
+Content-Type: application/json
+```
+
+**Request body**
+
+```json
+{
+  "status": "active" | "completed",
+  "return_deadline": "ISO8601 timestamp"
+}
+```
+
+**Response**
+
+```json
+{
+  "reservation_id": "uuid",
+  "user_id": "uuid",
+  "book_id": "uuid",
+  "user_name": "string",
+  "book_title": "string",
+  "status": "active" | "completed",
+  "reservation_date": "ISO8601 timestamp",
+  "return_deadline": "ISO8601 timestamp",
+  "created_at": "ISO8601 timestamp",
+  "updated_at": "ISO8601 timestamp"
+}
+```
+
+#### Cancel multiple reservations
+
+```
+DELETE /api/reservations/bulk
+Content-Type: application/json
+```
+
+**Request body**
+
+```json
+{
+  "reservation_ids": ["uuid", "uuid", ...]
+}
+```
+
+**Response**
+
+```json
+{
+  "message": "Successfully cancelled {count} reservations",
+  "cancelled_count": integer,
+  "total_requested": integer
+}
+```
+
+#### Get user's ALL reservations
+
+```
+GET /api/reservations/user/{user_id}
+```
+
+**Response**
+```json
+{
+  "user_id": "uuid",
+  "username": "string",
+  "reservations": [
+    {
+      "reservation_id": "uuid",
+      "book_id": "uuid",
+      "book_title": "string",
+      "status": "active" | "completed",
+      "reservation_date": "ISO8601 timestamp",
+      "return_deadline": "ISO8601 timestamp"
+    }
+  ],
+  "total_count": integer
+}
+```
+
+#### Get book's ALL reservations
+
+```
+GET /api/reservations/book/{book_id}
+```
+
+**Response**
+```json
+{
+  "book_id": "uuid",
+  "title": "string",
+  "reservations": [
+    {
+      "reservation_id": "uuid",
+      "user_id": "uuid",
+      "user_name": "string",
+      "status": "active" | "completed",
+      "reservation_date": "ISO8601 timestamp",
+      "return_deadline": "ISO8601 timestamp"
+    }
+  ],
+  "total_count": integer
+}
+```
 
 ## Error Handling
 
