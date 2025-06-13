@@ -122,7 +122,6 @@ function App() {
 
             {/* Create Reservation Section */}
             <div className="bg-neutral-800 shadow-lg rounded-lg p-6 flex flex-col items-center">
-              <h2 className="text-xl font-semibold mb-4 text-neutral-200">Create New Reservation</h2>
               <button
                 className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 ease-in-out
                   ${selectedUserId && selectedBookId && !isCreatingReservation
