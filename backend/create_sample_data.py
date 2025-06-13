@@ -143,17 +143,6 @@ async def test_api_endpoints():
     print("\n🔍 Testing API endpoints...")
 
     async with aiohttp.ClientSession() as session:
-        # Test hello endpoint
-        try:
-            async with session.get(f"{API_BASE}/hello") as resp:
-                if resp.status == 200:
-                    result = await resp.json()
-                    print(f"✓ Hello endpoint: {result['message']}")
-                else:
-                    print(f"✗ Hello endpoint failed: {resp.status}")
-        except Exception as e:
-            print(f"✗ Hello endpoint error: {e}")
-
         # Test books list endpoint
         try:
             async with session.get(f"{API_BASE}/books") as resp:

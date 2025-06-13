@@ -4,7 +4,6 @@ import tornado.web
 import tornado.platform.asyncio
 import logging
 
-from handlers.hello_handler import HelloHandler
 from handlers.reservation_handler import (
     ReservationHandler,
     ReservationDetailHandler,
@@ -14,7 +13,6 @@ from handlers.user_book_handler import (
     UserReservationsHandler,
     BookReservationsHandler,
     BookHandler,
-    BookAvailabilityHandler,
     UserHandler,
     ActiveReservationsHandler
 )
@@ -31,9 +29,6 @@ logging.basicConfig(
 
 def make_app() -> tornado.web.Application:
     return tornado.web.Application([
-        # Original hello endpoint
-        (r"/api/hello", HelloHandler),
-
         # Reservation endpoints
         (r"/api/reservations", ReservationHandler),
         (r"/api/reservations/bulk", BulkReservationHandler),
