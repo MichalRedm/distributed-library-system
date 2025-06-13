@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
+import { useEffect, useState } from "react"; // Import useState
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserById, fetchAllReservations } from "../../services/userService";
-// Removed "./User.scss" as we are now using Tailwind CSS
 import { formatDate } from "../../utils/dateUtils";
 
 interface UserProps {
@@ -9,7 +8,8 @@ interface UserProps {
 }
 
 const User: React.FC<UserProps> = ({ id }) => {
-  const queryClient = useQueryClient(); // Initialize useQueryClient
+  const queryClient = useQueryClient();
+  const [openReservationId, setOpenReservationId] = useState<string | null>(null); // State to manage open accordion item
 
   useEffect(() => {
     if (id) {
@@ -36,16 +36,15 @@ const User: React.FC<UserProps> = ({ id }) => {
   });
 
   // Effect to invalidate and refetch user reservations when a new reservation is created
-  // This will be triggered by a direct invalidation from the App.tsx component
   useEffect(() => {
     if (id) {
-      // Invalidate the 'user-reservations' query for the current user ID
-      // This ensures that when a reservation is successfully created,
-      // this component's reservations data is refetched.
       queryClient.invalidateQueries({ queryKey: ["user-reservations", id] });
     }
-  }, [id, queryClient]); // Depend on id and queryClient
+  }, [id, queryClient]);
 
+  const handleReservationClick = (reservationId: string) => {
+    setOpenReservationId(prevId => (prevId === reservationId ? null : reservationId));
+  };
 
   if (!id) {
     return (
@@ -61,9 +60,14 @@ const User: React.FC<UserProps> = ({ id }) => {
   if (reservationsError) return <p className="text-red-500">Error loading reservations: {(reservationsError as Error).message}</p>;
   if (!reservationsData) return null;
 
-  const sortedReservations = reservationsData.reservations.slice().sort((a, b) =>
-    a.reservation_date.localeCompare(b.reservation_date)
-  );
+  // Sort reservations: active first, then by reservation_date
+  const sortedReservations = reservationsData.reservations.slice().sort((a, b) => {
+    // Active reservations come before completed ones
+    if (a.status === "active" && b.status !== "active") return -1;
+    if (a.status !== "active" && b.status === "active") return 1;
+    // For same status, sort by reservation_date
+    return a.reservation_date.localeCompare(b.reservation_date);
+  });
 
   return (
     <div className="user p-4 bg-neutral-700 rounded-lg shadow-inner">
@@ -77,11 +81,26 @@ const User: React.FC<UserProps> = ({ id }) => {
       ) : (
         <ul className="space-y-3">
           {sortedReservations.map(reservation => (
-            <li key={reservation.reservation_id} className="bg-neutral-600 p-3 rounded-lg shadow-sm">
-              <p className="mb-1"><strong className="text-neutral-300">Book:</strong> {reservation.book_title}</p>
-              <p className="mb-1"><strong className="text-neutral-300">Status:</strong> <span className={`${reservation.status === 'active' ? 'text-green-400' : 'text-gray-400'}`}>{reservation.status}</span></p>
-              <p className="mb-1"><strong className="text-neutral-300">Reservation Date:</strong> {formatDate(reservation.reservation_date)}</p>
-              <p><strong className="text-neutral-300">Return Deadline:</strong> {formatDate(reservation.return_deadline)}</p>
+            <li
+              key={reservation.reservation_id}
+              className={`bg-neutral-600 p-3 rounded-lg shadow-sm cursor-pointer transition-all duration-300 ease-in-out
+                ${reservation.status === 'active' ? 'border-l-4 border-green-500 bg-neutral-500 hover:bg-neutral-400' : 'hover:bg-neutral-500'}
+                ${openReservationId === reservation.reservation_id ? 'ring-2 ring-blue-500' : ''}
+              `}
+              onClick={() => handleReservationClick(reservation.reservation_id)}
+            >
+              <div className="flex justify-between items-center">
+                <p className="font-bold text-neutral-200">Book: {reservation.book_title}</p>
+                <span className={`text-sm font-semibold ${reservation.status === 'active' ? 'text-green-400' : 'text-gray-400'}`}>
+                  {reservation.status === 'active' ? 'Active' : 'Completed'}
+                </span>
+              </div>
+              {openReservationId === reservation.reservation_id && (
+                <div className="mt-2 text-neutral-300 space-y-1 text-sm">
+                  <p><strong className="text-neutral-300">Reservation Date:</strong> {formatDate(reservation.reservation_date)}</p>
+                  <p><strong className="text-neutral-300">Return Deadline:</strong> {formatDate(reservation.return_deadline)}</p>
+                </div>
+              )}
             </li>
           ))}
         </ul>
