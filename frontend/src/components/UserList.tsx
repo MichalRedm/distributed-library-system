@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchUsers } from "../../services/userService";
-import SelectableList from "../SelectableList/SelectableList";
-import type { User } from "../../types/user";
+import { fetchUsers } from "../services/userService";
+import SelectableList from "./SelectableList";
+import type { User } from "../types/user";
 
 interface UserListProps {
   selectedUserId: string | null;

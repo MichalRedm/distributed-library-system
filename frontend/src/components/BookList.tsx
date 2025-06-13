@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchBooks } from "../../services/bookService";
-import SelectableList from "../SelectableList/SelectableList";
-import type { Book } from "../../types/book";
+import { fetchBooks } from "../services/bookService";
+import SelectableList from "./SelectableList";
+import type { Book } from "../types/book";
 
 interface BookListProps {
   selectedBookId: string | null;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { fetchUserById, fetchAllReservations } from "../../services/userService";
-import { updateReservation } from "../../services/reservationService";
-import { formatDate } from "../../utils/dateUtils";
+import { fetchUserById, fetchAllReservations } from "../services/userService";
+import { updateReservation } from "../services/reservationService";
+import { formatDate } from "../utils/dateUtils";
 
 // Import Font Awesome React components and icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
