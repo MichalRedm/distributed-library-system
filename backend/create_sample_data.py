@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 """
 Sample data creation script for the library reservation system.
-Run this script to populate your database with sample users and books for testing.
+Run this script to populate your database with sample users and
+books for testing.
 
 Usage: python create_sample_data.py
 """
 
 import asyncio
 import aiohttp
-# import json
-# import uuid
 
 API_BASE = "http://localhost:8000/api"
 
 
 async def create_sample_data():
     """Create sample users and books for testing"""
-    
+
     async with aiohttp.ClientSession() as session:
         print("Creating sample data...")
-        
+
         # Sample users
         users = [
             {"username": "alice_smith"},
@@ -41,10 +40,16 @@ async def create_sample_data():
                     if resp.status == 201:
                         result = await resp.json()
                         user_ids.append(result['user_id'])
-                        print(f"✓ Created user: {user_data['username']} (ID: {result['user_id']})")
+                        print(
+                            f"✓ Created user: {user_data['username']} "
+                            f"(ID: {result['user_id']})"
+                        )
                     else:
                         error = await resp.json()
-                        print(f"✗ Failed to create user {user_data['username']}: {error}")
+                        print(
+                            "✗ Failed to create user "
+                            f"{user_data['username']}: {error}"
+                        )
             except Exception as e:
                 print(f"✗ Error creating user {user_data['username']}: {e}")
 
@@ -61,7 +66,7 @@ async def create_sample_data():
             {"title": "The Hobbit"},
             {"title": "Fahrenheit 451"}
         ]
-        
+
         book_ids = []
         print("\nCreating books...")
         for book_data in books:
@@ -74,55 +79,69 @@ async def create_sample_data():
                     if resp.status == 201:
                         result = await resp.json()
                         book_ids.append(result['book_id'])
-                        print(f"✓ Created book: {book_data['title']} (ID: {result['book_id']})")
+                        print(
+                            f"✓ Created book: {book_data['title']} "
+                            f"(ID: {result['book_id']})"
+                        )
                     else:
                         error = await resp.json()
-                        print(f"✗ Failed to create book {book_data['title']}: {error}")
+                        print(
+                            "✗ Failed to create book "
+                            f"{book_data['title']}: {error}"
+                        )
             except Exception as e:
                 print(f"✗ Error creating book {book_data['title']}: {e}")
-        
+
         # Create some sample reservations
         print("\nCreating sample reservations...")
         if user_ids and book_ids:
             # Create a few reservations for testing
             sample_reservations = [
-                {"user_id": user_ids[0], "book_id": book_ids[0]},  # Alice reserves The Great Gatsby
-                {"user_id": user_ids[1], "book_id": book_ids[1]},  # Bob reserves To Kill a Mockingbird
-                {"user_id": user_ids[0], "book_id": book_ids[2]},  # Alice also reserves 1984
+                {"user_id": user_ids[0], "book_id": book_ids[0]},
+                {"user_id": user_ids[1], "book_id": book_ids[1]},
+                {"user_id": user_ids[0], "book_id": book_ids[2]},
             ]
-            
+
             reservation_ids = []
             for reservation_data in sample_reservations:
                 try:
-                    async with session.post(f"{API_BASE}/reservations",
-                                          json=reservation_data,
-                                          headers={"Content-Type": "application/json"}) as resp:
+                    async with session.post(
+                        f"{API_BASE}/reservations",
+                        json=reservation_data,
+                        headers={"Content-Type": "application/json"}
+                    ) as resp:
                         if resp.status == 201:
                             result = await resp.json()
                             reservation_ids.append(result['reservation_id'])
-                            print(f"✓ Created reservation: {result['user_name']} reserved {result['book_title']} (ID: {result['reservation_id']})")
+                            print(
+                                "✓ Created reservation: "
+                                f"{result['user_name']} "
+                                f"reserved {result['book_title']} "
+                                f"(ID: {result['reservation_id']})"
+                            )
                         else:
                             error = await resp.json()
                             print(f"✗ Failed to create reservation: {error}")
                 except Exception as e:
                     print(f"✗ Error creating reservation: {e}")
-        
-        print(f"\n🎉 Sample data creation complete!")
+
+        print("\n🎉 Sample data creation complete!")
         print(f"Created {len(user_ids)} users, {len(book_ids)} books")
-        
+
         if user_ids and book_ids:
-            print(f"\n📚 You can now test the API with these IDs:")
+            print("\n📚 You can now test the API with these IDs:")
             print(f"Sample User ID: {user_ids[0]}")
             print(f"Sample Book ID: {book_ids[0]}")
-            print(f"\nExample API calls:")
+            print("\nExample API calls:")
             print(f"curl -X GET {API_BASE}/users/{user_ids[0]}")
             print(f"curl -X GET {API_BASE}/books/{book_ids[0]}")
             print(f"curl -X GET {API_BASE}/reservations/user/{user_ids[0]}")
 
+
 async def test_api_endpoints():
     """Test some basic API endpoints to verify everything is working"""
     print("\n🔍 Testing API endpoints...")
-    
+
     async with aiohttp.ClientSession() as session:
         # Test hello endpoint
         try:
@@ -134,43 +153,50 @@ async def test_api_endpoints():
                     print(f"✗ Hello endpoint failed: {resp.status}")
         except Exception as e:
             print(f"✗ Hello endpoint error: {e}")
-        
+
         # Test books list endpoint
         try:
             async with session.get(f"{API_BASE}/books") as resp:
                 if resp.status == 200:
                     result = await resp.json()
-                    print(f"✓ Books endpoint: Found {result['total_count']} books")
+                    print(
+                        "✓ Books endpoint: "
+                        f"Found {result['total_count']} books"
+                    )
                 else:
                     print(f"✗ Books endpoint failed: {resp.status}")
         except Exception as e:
             print(f"✗ Books endpoint error: {e}")
-        
+
         # Test available books
         try:
             async with session.get(f"{API_BASE}/books?available=true") as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     available_count = result['total_count']
-                    print(f"✓ Available books endpoint: Found {available_count} available books")
+                    print(
+                        "✓ Available books endpoint: "
+                        f"Found {available_count} available books"
+                    )
                 else:
                     print(f"✗ Available books endpoint failed: {resp.status}")
         except Exception as e:
             print(f"✗ Available books endpoint error: {e}")
+
 
 if __name__ == "__main__":
     print("Library Reservation System - Sample Data Creator")
     print("=" * 50)
     print("Make sure your server is running on http://localhost:8000")
     print("Press Ctrl+C to cancel\n")
-    
+
     try:
         # First test basic connectivity
         asyncio.run(test_api_endpoints())
-        
+
         # Then create sample data
         asyncio.run(create_sample_data())
-        
+
     except KeyboardInterrupt:
         print("\n❌ Cancelled by user")
     except Exception as e:

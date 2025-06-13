@@ -33,7 +33,7 @@ async def init_cassandra():
 
         print("✓ Keyspace 'data' created successfully")
         session = cluster.connect('data')
-        
+
         # Create tables if they don't exist
         await create_tables()
 
@@ -55,6 +55,12 @@ def get_session():
 
 async def execute_async(query, parameters=None):
     """Execute Cassandra query asynchronously"""
+    global session
+    if session is None:
+        raise RuntimeError(
+            "Cassandra session is not initialized. "
+            "Call init_cassandra() first."
+        )
     loop = asyncio.get_event_loop()
     try:
         if parameters:

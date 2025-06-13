@@ -2,18 +2,20 @@ import tornado.web
 import json
 import uuid
 from datetime import datetime
-from cassandra.cluster import NoHostAvailable
-from cassandra import InvalidRequest
 from db.cassandra import execute_async
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
-        self.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        self.set_header(
+            "Access-Control-Allow-Methods",
+            "GET, POST, PUT, DELETE, OPTIONS"
+        )
         self.set_header("Content-Type", "application/json")
 
     def options(self):
@@ -23,30 +25,31 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.set_header("Content-Type", "application/json")
         error_message = "An error occurred"
-        
+
         if "exc_info" in kwargs:
             error_message = str(kwargs["exc_info"][1])
-        
+
         self.write({
             "error": error_message,
             "status_code": status_code
         })
+
 
 class UserReservationsHandler(BaseHandler):
     async def get(self, user_id):
         """Get all reservations for a user (active + completed)"""
         try:
             user_uuid = uuid.UUID(user_id)
-            
+
             # Get reservations from reservations_by_user table
             query = """
-                SELECT reservation_id, book_id, book_title, status, 
-                       reservation_date, return_deadline 
-                FROM reservations_by_user 
+                SELECT reservation_id, book_id, book_title, status,
+                       reservation_date, return_deadline
+                FROM reservations_by_user
                 WHERE user_id = %s
             """
             result = await execute_async(query, (user_uuid,))
-            
+
             reservations = []
             for row in result:
                 reservations.append({
@@ -57,13 +60,13 @@ class UserReservationsHandler(BaseHandler):
                     "reservation_date": row.reservation_date.isoformat(),
                     "return_deadline": row.return_deadline.isoformat()
                 })
-            
+
             self.write({
                 "user_id": str(user_uuid),
                 "reservations": reservations,
                 "total_count": len(reservations)
             })
-            
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid user ID format"})
@@ -72,21 +75,22 @@ class UserReservationsHandler(BaseHandler):
             self.set_status(500)
             self.write({"error": "Internal server error"})
 
+
 class BookReservationsHandler(BaseHandler):
     async def get(self, book_id):
         """Get all reservations for a book (active + completed)"""
         try:
             book_uuid = uuid.UUID(book_id)
-            
+
             # Get reservations from reservations_by_book table
             query = """
-                SELECT reservation_id, user_id, user_name, status, 
-                       reservation_date, return_deadline 
-                FROM reservations_by_book 
+                SELECT reservation_id, user_id, user_name, status,
+                       reservation_date, return_deadline
+                FROM reservations_by_book
                 WHERE book_id = %s
             """
             result = await execute_async(query, (book_uuid,))
-            
+
             reservations = []
             for row in result:
                 reservations.append({
@@ -97,13 +101,13 @@ class BookReservationsHandler(BaseHandler):
                     "reservation_date": row.reservation_date.isoformat(),
                     "return_deadline": row.return_deadline.isoformat()
                 })
-            
+
             self.write({
                 "book_id": str(book_uuid),
                 "reservations": reservations,
                 "total_count": len(reservations)
             })
-            
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid book ID format"})
@@ -111,6 +115,7 @@ class BookReservationsHandler(BaseHandler):
             logger.error(f"Error fetching book reservations: {str(e)}")
             self.set_status(500)
             self.write({"error": "Internal server error"})
+
 
 class BookHandler(BaseHandler):
     async def get(self, book_id=None):
@@ -121,12 +126,12 @@ class BookHandler(BaseHandler):
                 book_uuid = uuid.UUID(book_id)
                 query = "SELECT * FROM books WHERE book_id = %s"
                 result = await execute_async(query, (book_uuid,))
-                
+
                 if not result:
                     self.set_status(404)
                     self.write({"error": "Book not found"})
                     return
-                
+
                 book = result[0]
                 self.write({
                     "book_id": str(book.book_id),
@@ -136,15 +141,19 @@ class BookHandler(BaseHandler):
                 })
             else:
                 # List all books, optionally filter by availability
-                available_only = self.get_argument("available", "false").lower() == "true"
-                
+                available_arg = self.get_argument("available", "false")
+                available_only = available_arg.lower() == "true"
+
                 if available_only:
-                    query = "SELECT * FROM books WHERE status = 'available' ALLOW FILTERING"
+                    query = (
+                        "SELECT * FROM books WHERE status = 'available' "
+                        "ALLOW FILTERING"
+                    )
                     result = await execute_async(query)
                 else:
                     query = "SELECT * FROM books"
                     result = await execute_async(query)
-                
+
                 books = []
                 for book in result:
                     books.append({
@@ -153,13 +162,15 @@ class BookHandler(BaseHandler):
                         "status": book.status,
                         "created_at": book.created_at.isoformat()
                     })
-                
+
                 self.write({
                     "books": books,
                     "total_count": len(books),
-                    "filter_applied": "available_only" if available_only else "none"
+                    "filter_applied": (
+                        "available_only" if available_only else "none"
+                    )
                 })
-                
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid book ID format"})
@@ -172,23 +183,26 @@ class BookHandler(BaseHandler):
         """Create a new book"""
         try:
             data = json.loads(self.request.body)
-            
+
             # Validate required fields
             if 'title' not in data:
                 self.set_status(400)
                 self.write({"error": "Missing required field: title"})
                 return
-            
+
             book_id = uuid.uuid4()
             now = datetime.utcnow()
-            
+
             # Insert book
             query = """
                 INSERT INTO books (book_id, title, status, created_at)
                 VALUES (%s, %s, %s, %s)
             """
-            await execute_async(query, (book_id, data['title'], 'available', now))
-            
+            await execute_async(
+                query,
+                (book_id, data['title'], 'available', now)
+            )
+
             self.set_status(201)
             self.write({
                 "book_id": str(book_id),
@@ -196,7 +210,7 @@ class BookHandler(BaseHandler):
                 "status": "available",
                 "created_at": now.isoformat()
             })
-            
+
         except json.JSONDecodeError:
             self.set_status(400)
             self.write({"error": "Invalid JSON"})
@@ -205,12 +219,16 @@ class BookHandler(BaseHandler):
             self.set_status(500)
             self.write({"error": "Internal server error"})
 
+
 class BookAvailabilityHandler(BaseHandler):
     async def get(self, book_id):
-        """Check if a book is available (fast O(1) lookup using reservations_user_book)"""
+        """
+        Check if a book is available (fast O(1)
+        lookup using reservations_user_book)
+        """
         try:
             book_uuid = uuid.UUID(book_id)
-            
+
             # First check if book exists
             book_query = "SELECT book_id FROM books WHERE book_id = %s"
             book_result = await execute_async(book_query, (book_uuid,))
@@ -218,20 +236,23 @@ class BookAvailabilityHandler(BaseHandler):
                 self.set_status(404)
                 self.write({"error": "Book not found"})
                 return
-            
+
             # Check if book has any active reservations
             # If it exists in reservations_user_book, it's reserved
-            active_query = "SELECT book_id FROM reservations_user_book WHERE book_id = %s ALLOW FILTERING"
+            active_query = (
+                "SELECT book_id FROM reservations_user_book "
+                "WHERE book_id = %s ALLOW FILTERING"
+            )
             active_result = await execute_async(active_query, (book_uuid,))
-            
+
             is_available = len(active_result) == 0
-            
+
             self.write({
                 "book_id": str(book_uuid),
                 "available": is_available,
                 "status": "available" if is_available else "checked_out"
             })
-            
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid book ID format"})
@@ -240,12 +261,16 @@ class BookAvailabilityHandler(BaseHandler):
             self.set_status(500)
             self.write({"error": "Internal server error"})
 
+
 class ActiveReservationsHandler(BaseHandler):
     async def get(self, user_id):
-        """Get active reservations for a user (fast O(1) lookup using reservations_user_book)"""
+        """
+        Get active reservations for a user
+        (fast O(1) lookup using reservations_user_book)
+        """
         try:
             user_uuid = uuid.UUID(user_id)
-            
+
             # Check if user exists
             user_query = "SELECT username FROM users WHERE user_id = %s"
             user_result = await execute_async(user_query, (user_uuid,))
@@ -253,16 +278,16 @@ class ActiveReservationsHandler(BaseHandler):
                 self.set_status(404)
                 self.write({"error": "User not found"})
                 return
-            
+
             # Get active reservations from reservations_user_book table
             query = """
-                SELECT book_id, reservation_id, book_title, reservation_date, 
-                       return_deadline, created_at 
-                FROM reservations_user_book 
+                SELECT book_id, reservation_id, book_title, reservation_date,
+                       return_deadline, created_at
+                FROM reservations_user_book
                 WHERE user_id = %s
             """
             result = await execute_async(query, (user_uuid,))
-            
+
             active_reservations = []
             for row in result:
                 active_reservations.append({
@@ -273,14 +298,14 @@ class ActiveReservationsHandler(BaseHandler):
                     "return_deadline": row.return_deadline.isoformat(),
                     "created_at": row.created_at.isoformat()
                 })
-            
+
             self.write({
                 "user_id": str(user_uuid),
                 "username": user_result[0].username,
                 "active_reservations": active_reservations,
                 "active_count": len(active_reservations)
             })
-            
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid user ID format"})
@@ -288,6 +313,7 @@ class ActiveReservationsHandler(BaseHandler):
             logger.error(f"Error fetching active reservations: {str(e)}")
             self.set_status(500)
             self.write({"error": "Internal server error"})
+
 
 class UserHandler(BaseHandler):
     async def get(self, user_id=None):
@@ -298,19 +324,22 @@ class UserHandler(BaseHandler):
                 user_uuid = uuid.UUID(user_id)
                 query = "SELECT * FROM users WHERE user_id = %s"
                 result = await execute_async(query, (user_uuid,))
-                
+
                 if not result:
                     self.set_status(404)
                     self.write({"error": "User not found"})
                     return
-                
+
                 user = result[0]
-                
+
                 # Also get active reservations count for this user
-                active_query = "SELECT COUNT(*) FROM reservations_user_book WHERE user_id = %s"
+                active_query = (
+                    "SELECT COUNT(*) FROM reservations_user_book "
+                    "WHERE user_id = %s"
+                )
                 active_result = await execute_async(active_query, (user_uuid,))
                 active_count = active_result[0].count if active_result else 0
-                
+
                 self.write({
                     "user_id": str(user.user_id),
                     "username": user.username,
@@ -321,7 +350,7 @@ class UserHandler(BaseHandler):
                 # List all users
                 query = "SELECT * FROM users"
                 result = await execute_async(query)
-                
+
                 users = []
                 for user in result:
                     users.append({
@@ -329,12 +358,12 @@ class UserHandler(BaseHandler):
                         "username": user.username,
                         "created_at": user.created_at.isoformat()
                     })
-                
+
                 self.write({
                     "users": users,
                     "total_count": len(users)
                 })
-                
+
         except ValueError:
             self.set_status(400)
             self.write({"error": "Invalid user ID format"})
@@ -347,30 +376,30 @@ class UserHandler(BaseHandler):
         """Create a new user"""
         try:
             data = json.loads(self.request.body)
-            
+
             # Validate required fields
             if 'username' not in data:
                 self.set_status(400)
                 self.write({"error": "Missing required field: username"})
                 return
-            
+
             user_id = uuid.uuid4()
             now = datetime.utcnow()
-            
+
             # Insert user
             query = """
                 INSERT INTO users (user_id, username, created_at)
                 VALUES (%s, %s, %s)
             """
             await execute_async(query, (user_id, data['username'], now))
-            
+
             self.set_status(201)
             self.write({
                 "user_id": str(user_id),
                 "username": data['username'],
                 "created_at": now.isoformat()
             })
-            
+
         except json.JSONDecodeError:
             self.set_status(400)
             self.write({"error": "Invalid JSON"})

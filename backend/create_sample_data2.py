@@ -1,12 +1,11 @@
 import requests
 import uuid
-import random
-from datetime import datetime
 
 API_BASE = "http://localhost:8000/api"
 
 NUM_USERS = 5
 NUM_BOOKS = 5
+
 
 def create_users():
     users = []
@@ -21,16 +20,11 @@ def create_users():
             print(f"❌ Failed to create user {username}: {res.text}")
     return users
 
+
 def create_books():
     books = []
     for i in range(NUM_BOOKS):
         title = f"Book {i+1} - {uuid.uuid4().hex[:5]}"
-        book_data = {
-            "book_id": str(uuid.uuid4()),
-            "title": title,
-            "status": "available",
-            "created_at": datetime.utcnow().isoformat()
-        }
         res = requests.post(f"{API_BASE}/books", json={"title": title})
         if res.status_code in (200, 201):
             book = res.json()
@@ -39,6 +33,7 @@ def create_books():
         else:
             print(f"❌ Failed to create book {title}: {res.text}")
     return books
+
 
 def make_reservations(users, books):
     num = min(3, len(users), len(books))
@@ -51,9 +46,13 @@ def make_reservations(users, books):
         }
         res = requests.post(f"{API_BASE}/reservations", json=payload)
         if res.status_code == 201:
-            print(f"📚 Reservation created: {user['username']} → {book['title']}")
+            print(
+                "📚 Reservation created: "
+                f"{user['username']} → {book['title']}"
+            )
         else:
             print(f"⚠️ Failed to create reservation: {res.text}")
+
 
 if __name__ == "__main__":
     print("🔧 Creating sample users and books...\n")
