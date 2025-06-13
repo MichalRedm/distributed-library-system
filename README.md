@@ -29,7 +29,7 @@ Built as a **two-node distributed application** to fulfill course requirements f
 
 | Layer     | Tech                                      |
 | --------- | ----------------------------------------- |
-| Frontend  | React, TypeScript, SCSS                   |
+| Frontend  | React, TypeScript, SCSS, Tailwind CSS     |
 | Backend   | Python, Tornado                           |
 | Database  | Apache Cassandra                          |
 | Cluster   | Multi-node Docker (or manual)             |
@@ -105,7 +105,7 @@ This will concurrently start:
        ↓ REST API
 [Backend: Tornado]
        ↓ CQL
-[Cassandra Node 1] ⇄ [Cassandra Node 2] ⇄ [Cassandra Node 3]
+[Cassandra Node 1] ⇄ [Cassandra Node 2]
 ```
 
 * Stateless Tornado backend handles business logic and routes.
@@ -159,15 +159,6 @@ bigdata-distributed-app/
 * 🗃️ Database schema
 * 🛠️ Performance analysis
 * 🧵 Challenges and conclusions
-
----
-
-## 💡 Future Work
-
-* Add user authentication (e.g. JWT)
-* Admin panel for library management
-* GraphQL or gRPC API layer
-* Full CI/CD pipeline
 
 ---
 
