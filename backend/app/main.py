@@ -44,7 +44,6 @@ def make_app() -> tornado.web.Application:
         # Book endpoints
         (r"/api/books", BookHandler),
         (r"/api/books/([^/]+)", BookHandler),
-        (r"/api/books/([^/]+)/availability", BookAvailabilityHandler),
 
         # User endpoints
         (r"/api/users", UserHandler),

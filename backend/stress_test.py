@@ -237,7 +237,7 @@ class LibraryStressTest:
                 # Randomly choose request type
                 request_type = random.choice([
                     'get_users', 'get_books', 'get_user_reservations', 
-                    'get_book_reservations', 'check_availability', 'get_active_reservations'
+                    'get_book_reservations', 'get_active_reservations'
                 ])
                 
                 try:
@@ -256,10 +256,6 @@ class LibraryStressTest:
                     elif request_type == 'get_book_reservations' and self.books:
                         book = random.choice(self.books)
                         result = await self.make_request('GET', f'/api/reservations/book/{book["book_id"]}')
-                        
-                    elif request_type == 'check_availability' and self.books:
-                        book = random.choice(self.books)
-                        result = await self.make_request('GET', f'/api/books/{book["book_id"]}/availability')
                         
                     elif request_type == 'get_active_reservations' and self.users:
                         user = random.choice(self.users)

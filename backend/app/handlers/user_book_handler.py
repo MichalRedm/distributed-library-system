@@ -140,19 +140,12 @@ class BookHandler(BaseHandler):
                     "created_at": book.created_at.isoformat()
                 })
             else:
-                # List all books, optionally filter by availability
+                # List all books
                 available_arg = self.get_argument("available", "false")
                 available_only = available_arg.lower() == "true"
 
-                if available_only:
-                    query = (
-                        "SELECT * FROM books WHERE status = 'available' "
-                        "ALLOW FILTERING"
-                    )
-                    result = await execute_async(query)
-                else:
-                    query = "SELECT * FROM books"
-                    result = await execute_async(query)
+                query = "SELECT * FROM books"
+                result = await execute_async(query)
 
                 books = []
                 for book in result:
