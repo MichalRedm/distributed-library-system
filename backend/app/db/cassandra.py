@@ -1,3 +1,4 @@
+<<<<<<< backend-basics
 from cassandra.cluster import Cluster  # type: ignore
 from cassandra.policies import DCAwareRoundRobinPolicy  # type: ignore
 import logging
@@ -10,9 +11,20 @@ executor = ThreadPoolExecutor(max_workers=10)
 
 logger = logging.getLogger(__name__)
 
+=======
+from cassandra.cluster import Cluster, Session
+from typing import Optional
+# from cassandra.auth import PlainTextAuthProvider
 
-async def init_cassandra():
+>>>>>>> master
+
+cluster: Optional[Cluster] = None
+session: Optional[Session] = None
+
+
+async def init_cassandra() -> None:
     global cluster, session
+<<<<<<< backend-basics
     try:
         cluster = Cluster(
             contact_points=[('127.0.0.1', 9042), ('127.0.0.1', 9043)],
@@ -42,14 +54,30 @@ async def init_cassandra():
         logger.error(f"Failed to connect to Cassandra: {e}")
         raise
 
+=======
+    # add more IPs for multiple nodes
+    cluster = Cluster(['127.0.0.2', '127.0.0.3'])
+    session = cluster.connect('data')
+    print("Connected to Cassandra")
+>>>>>>> master
 
-async def close_cassandra():
+
+async def close_cassandra() -> None:
     if cluster:
         cluster.shutdown()
         print("Cassandra connection closed")
 
 
+<<<<<<< backend-basics
 def get_session():
+=======
+def get_session() -> Session:
+    if session is None:
+        raise RuntimeError(
+            "Cassandra session is not initialized. "
+            "Call init_cassandra() first."
+        )
+>>>>>>> master
     return session
 
 
