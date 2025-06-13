@@ -3,6 +3,7 @@ import "./App.scss";
 import User from "./components/User";
 import UserList from "./components/UserList";
 import BookList from "./components/BookList";
+import Book from "./components/Book";
 
 function App() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -37,17 +38,13 @@ function App() {
         {tab === "users" && (
           <UserList onSelectUser={handleSelectUserId} />
         )}
-        { tab === "books" && (
+        {tab === "books" && (
           <BookList onSelectBook={handleSelectBookId} />
         )}
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <User id={selectedUserId} />
-        {selectedBookId && (
-          <div className="book-details">
-            <h2>Selected Book ID: {selectedBookId}</h2>
-          </div>
-        )}
+        <Book id={selectedBookId} />
       </div>
     </div>
   );
