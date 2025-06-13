@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserById } from "../../services/userService";
+import { fetchUserById, fetchAllReservations } from "../../services/userService";
+import "./User.scss"; // we'll use it in a moment
 
 interface UserProps {
   id: string | null;
@@ -13,28 +14,59 @@ const User: React.FC<UserProps> = ({ id }) => {
     }
   }, [id]);
 
-  const { data, error, isLoading } = useQuery({
+  const { data: user, error: userError, isLoading: userLoading } = useQuery({
     queryKey: ["user", id],
     queryFn: () => {
       if (!id) return Promise.reject("No user ID provided");
       return fetchUserById(id);
     },
-    enabled: !!id // only run query if id is not null
+    enabled: !!id
+  });
+
+  const { data: reservationsData, error: reservationsError, isLoading: reservationsLoading } = useQuery({
+    queryKey: ["user-reservations", id],
+    queryFn: () => {
+      if (!id) return Promise.reject("No user ID provided");
+      return fetchAllReservations(id);
+    },
+    enabled: !!id
   });
 
   if (!id) {
     return <div className="user"><h2>User Profile</h2><p>Please select a user to view their profile.</p></div>;
   }
 
-  if (isLoading) return <p>Loading user...</p>;
-  if (error) return <p>Error loading user: {(error as Error).message}</p>;
+  if (userLoading || reservationsLoading) return <p>Loading user...</p>;
+  if (userError) return <p>Error loading user: {(userError as Error).message}</p>;
+  if (reservationsError) return <p>Error loading reservations: {(reservationsError as Error).message}</p>;
+  if (!reservationsData) return null;
+
+  // Sort reservations by reservation_date
+  const sortedReservations = reservationsData.reservations.slice().sort((a, b) =>
+    a.reservation_date.localeCompare(b.reservation_date)
+  );
 
   return (
     <div className="user">
       <h2>User Profile</h2>
-      <p><strong>Username:</strong> {data?.username}</p>
-      <p><strong>Created At:</strong> {data?.created_at}</p>
-      <p><strong>Active Reservations:</strong> {data?.active_reservations_count}</p>
+      <p><strong>Username:</strong> {user?.username}</p>
+      <p><strong>Created At:</strong> {user?.created_at}</p>
+
+      <h3>Reservations</h3>
+      {sortedReservations.length === 0 ? (
+        <p>No reservations found.</p>
+      ) : (
+        <ul className="list-container__items">
+          {sortedReservations.map(reservation => (
+            <li key={reservation.reservation_id} className="list-container__item">
+              <p><strong>Book:</strong> {reservation.book_title}</p>
+              <p><strong>Status:</strong> {reservation.status}</p>
+              <p><strong>Reservation Date:</strong> {reservation.reservation_date}</p>
+              <p><strong>Return Deadline:</strong> {reservation.return_deadline}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

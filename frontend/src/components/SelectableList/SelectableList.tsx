@@ -39,11 +39,11 @@ function SelectableList<T>({
         className="selectable-list__search"
         style={{ marginBottom: "20px" }}
       />
-      <ul className="selectable-list__items">
+      <ul className="list-items">
         {filteredItems.map((item) => (
           <li
             key={extractId(item)}
-            className="selectable-list__item"
+            className="list-item"
             onClick={() => onSelect(extractId(item))}
           >
             {extractLabel(item)}

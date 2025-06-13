@@ -1,25 +1,5 @@
+@use "../common/List" as *;
+
 .selectable-list {
-  &__items {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  &__item {
-    padding: 20px;
-    cursor: pointer;
-
-    &:nth-child(even) {
-      background-color: #383838
-    }
-    
-    &:nth-child(odd) {
-      background-color: #3f3f3f;
-    }
-    
-    &:hover {
-      background-color: #aaa;
-      color: #333;
-    }
-  }
+  // you can optionally still add component-scoped styles here
 }
