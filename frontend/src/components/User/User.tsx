@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"; // Import useState
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"; // Import useMutation
 import { fetchUserById, fetchAllReservations } from "../../services/userService";
+import { updateReservation } from "../../services/reservationService"; // Import updateReservation
 import { formatDate } from "../../utils/dateUtils";
 
 interface UserProps {
@@ -9,7 +10,7 @@ interface UserProps {
 
 const User: React.FC<UserProps> = ({ id }) => {
   const queryClient = useQueryClient();
-  const [openReservationId, setOpenReservationId] = useState<string | null>(null); // State to manage open accordion item
+  const [openReservationId, setOpenReservationId] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -35,15 +36,29 @@ const User: React.FC<UserProps> = ({ id }) => {
     enabled: !!id
   });
 
-  // Effect to invalidate and refetch user reservations when a new reservation is created
-  useEffect(() => {
-    if (id) {
+  // Define a mutation for updating a reservation
+  const updateReservationMutation = useMutation({
+    mutationFn: ({ reservationId, status }: { reservationId: string; status: 'completed' }) =>
+      updateReservation(reservationId, { status }),
+    onSuccess: () => {
+      // Invalidate the 'user-reservations' query for the current user
+      // This will trigger a refetch and update the list automatically
       queryClient.invalidateQueries({ queryKey: ["user-reservations", id] });
-    }
-  }, [id, queryClient]);
+      setOpenReservationId(null); // Close the accordion after update
+    },
+    onError: (error) => {
+      console.error("Failed to update reservation:", error);
+      // Optionally, display an error message to the user
+      alert("Failed to update reservation. Please try again."); // Using alert for simplicity, consider a custom modal
+    },
+  });
 
   const handleReservationClick = (reservationId: string) => {
     setOpenReservationId(prevId => (prevId === reservationId ? null : reservationId));
+  };
+
+  const handleMarkAsReturned = (reservationId: string) => {
+    updateReservationMutation.mutate({ reservationId, status: 'completed' });
   };
 
   if (!id) {
@@ -96,9 +111,23 @@ const User: React.FC<UserProps> = ({ id }) => {
                 </span>
               </div>
               {openReservationId === reservation.reservation_id && (
-                <div className="mt-2 text-neutral-300 space-y-1 text-sm">
+                <div className="mt-2 text-neutral-300 space-y-1 text-sm border-t border-neutral-700 pt-2">
+                  {/* Removed Status as requested: <p><strong className="text-neutral-300">Status:</strong> {reservation.status}</p> */}
                   <p><strong className="text-neutral-300">Reservation Date:</strong> {formatDate(reservation.reservation_date)}</p>
                   <p><strong className="text-neutral-300">Return Deadline:</strong> {formatDate(reservation.return_deadline)}</p>
+
+                  {reservation.status === 'active' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent accordion from closing when button is clicked
+                        handleMarkAsReturned(reservation.reservation_id);
+                      }}
+                      className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={updateReservationMutation.isPending}
+                    >
+                      {updateReservationMutation.isPending ? "Returning..." : "Mark as Returned"}
+                    </button>
+                  )}
                 </div>
               )}
             </li>
