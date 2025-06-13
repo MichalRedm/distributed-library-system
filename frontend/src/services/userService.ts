@@ -28,6 +28,6 @@ export async function fetchActiveReservations(userId: string): Promise<ActiveRes
 }
 
 export async function fetchAllReservations(userId: string): Promise<AllReservationsResponse> {
-  const response = await api.get<AllReservationsResponse>(`/users/${userId}/reservations`);
+  const response = await api.get<AllReservationsResponse>(`/reservations/user/${userId}`);
   return response.data;
 }

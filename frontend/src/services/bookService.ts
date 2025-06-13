@@ -24,7 +24,7 @@ export async function fetchBookAvailability(bookId: string): Promise<BookAvailab
 }
 
 export async function fetchBookReservations(bookId: string): Promise<BookReservationsResponse> {
-  const response = await api.get<BookReservationsResponse>(`/books/${bookId}/reservations`);
+  const response = await api.get<BookReservationsResponse>(`/reservations/book/${bookId}`);
   return response.data;
 }
 
