@@ -45,7 +45,7 @@ class ReservationHandler(BaseHandler):
             required_fields = ['user_id', 'book_id']
             for field in required_fields:
                 if field not in data:
-                    self.set_status(400)
+                    self.set_status(415)
                     self.write({"error": f"Missing required field: {field}"})
                     return
 
@@ -74,7 +74,7 @@ class ReservationHandler(BaseHandler):
             book_status = book_result[0].status
 
             if book_status != 'available':
-                self.set_status(400)
+                self.set_status(416)
                 self.write({"error": "Book is not available for reservation"})
                 return
 
@@ -88,7 +88,7 @@ class ReservationHandler(BaseHandler):
                 existing_reservation_query, (user_id, book_id)
             )
             if existing_result:
-                self.set_status(400)
+                self.set_status(417)
                 self.write({
                     "error": (
                         "User already has an active "
@@ -179,10 +179,10 @@ class ReservationHandler(BaseHandler):
             })
 
         except json.JSONDecodeError:
-            self.set_status(400)
+            self.set_status(418)
             self.write({"error": "Invalid JSON"})
         except ValueError as e:
-            self.set_status(400)
+            self.set_status(419)
             self.write({"error": f"Invalid UUID format: {str(e)}"})
         except Exception as e:
             logger.error(f"Error creating reservation: {str(e)}")
@@ -219,7 +219,7 @@ class ReservationDetailHandler(BaseHandler):
             })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(420)
             self.write({"error": "Invalid reservation ID format"})
         except Exception as e:
             logger.error(f"Error fetching reservation: {str(e)}")
@@ -248,7 +248,7 @@ class ReservationDetailHandler(BaseHandler):
             updates = {}
             if 'status' in data:
                 if data['status'] not in ['active', 'completed']:
-                    self.set_status(400)
+                    self.set_status(421)
                     self.write({
                         "error": (
                             "Invalid status. Must be 'active' or "
@@ -264,7 +264,7 @@ class ReservationDetailHandler(BaseHandler):
                         data['return_deadline'].replace('Z', '+00:00')
                     )
                 except ValueError:
-                    self.set_status(400)
+                    self.set_status(422)
                     self.write({
                         "error": (
                             "Invalid return_deadline format. "
@@ -274,7 +274,7 @@ class ReservationDetailHandler(BaseHandler):
                     return
 
             if not updates:
-                self.set_status(400)
+                self.set_status(423)
                 self.write({"error": "No valid fields to update"})
                 return
 
@@ -370,10 +370,10 @@ class ReservationDetailHandler(BaseHandler):
             })
 
         except json.JSONDecodeError:
-            self.set_status(400)
+            self.set_status(424)
             self.write({"error": "Invalid JSON"})
         except ValueError as e:
-            self.set_status(400)
+            self.set_status(425)
             self.write({"error": f"Invalid format: {str(e)}"})
         except Exception as e:
             logger.error(f"Error updating reservation: {str(e)}")
@@ -391,12 +391,12 @@ class BulkReservationHandler(BaseHandler):
                 'reservation_ids' not in data or
                 not isinstance(data['reservation_ids'], list)
             ):
-                self.set_status(400)
+                self.set_status(426)
                 self.write({"error": "reservation_ids must be a list"})
                 return
 
             if not data['reservation_ids']:
-                self.set_status(400)
+                self.set_status(427)
                 self.write({"error": "reservation_ids cannot be empty"})
                 return
 
@@ -406,7 +406,7 @@ class BulkReservationHandler(BaseHandler):
                 try:
                     reservation_uuids.append(uuid.UUID(res_id))
                 except ValueError:
-                    self.set_status(400)
+                    self.set_status(428)
                     self.write({
                         "error": (
                             f"Invalid reservation ID format: {res_id}"
@@ -493,7 +493,7 @@ class BulkReservationHandler(BaseHandler):
             })
 
         except json.JSONDecodeError:
-            self.set_status(400)
+            self.set_status(429)
             self.write({"error": "Invalid JSON"})
         except Exception as e:
             logger.error(f"Error cancelling reservations: {str(e)}")

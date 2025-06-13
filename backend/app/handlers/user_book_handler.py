@@ -68,7 +68,7 @@ class UserReservationsHandler(BaseHandler):
             })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(405)
             self.write({"error": "Invalid user ID format"})
         except Exception as e:
             logger.error(f"Error fetching user reservations: {str(e)}")
@@ -109,7 +109,7 @@ class BookReservationsHandler(BaseHandler):
             })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(406)
             self.write({"error": "Invalid book ID format"})
         except Exception as e:
             logger.error(f"Error fetching book reservations: {str(e)}")
@@ -172,7 +172,7 @@ class BookHandler(BaseHandler):
                 })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(407)
             self.write({"error": "Invalid book ID format"})
         except Exception as e:
             logger.error(f"Error fetching books: {str(e)}")
@@ -186,7 +186,7 @@ class BookHandler(BaseHandler):
 
             # Validate required fields
             if 'title' not in data:
-                self.set_status(400)
+                self.set_status(408)
                 self.write({"error": "Missing required field: title"})
                 return
 
@@ -212,7 +212,7 @@ class BookHandler(BaseHandler):
             })
 
         except json.JSONDecodeError:
-            self.set_status(400)
+            self.set_status(409)
             self.write({"error": "Invalid JSON"})
         except Exception as e:
             logger.error(f"Error creating book: {str(e)}")
@@ -223,38 +223,31 @@ class BookHandler(BaseHandler):
 class BookAvailabilityHandler(BaseHandler):
     async def get(self, book_id):
         """
-        Check if a book is available (fast O(1)
-        lookup using reservations_user_book)
+        Check if a book is available (fast O(1) lookup using book status)
         """
         try:
             book_uuid = uuid.UUID(book_id)
 
-            # First check if book exists
-            book_query = "SELECT book_id FROM books WHERE book_id = %s"
+            # Check book status directly - this is O(1) and efficient
+            book_query = "SELECT book_id, title, status FROM books WHERE book_id = %s"
             book_result = await execute_async(book_query, (book_uuid,))
             if not book_result:
                 self.set_status(404)
                 self.write({"error": "Book not found"})
                 return
 
-            # Check if book has any active reservations
-            # If it exists in reservations_user_book, it's reserved
-            active_query = (
-                "SELECT book_id FROM reservations_user_book "
-                "WHERE book_id = %s ALLOW FILTERING"
-            )
-            active_result = await execute_async(active_query, (book_uuid,))
-
-            is_available = len(active_result) == 0
+            book = book_result[0]
+            is_available = book.status == 'available'
 
             self.write({
                 "book_id": str(book_uuid),
+                "title": book.title,
                 "available": is_available,
-                "status": "available" if is_available else "checked_out"
+                "status": book.status
             })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(410)
             self.write({"error": "Invalid book ID format"})
         except Exception as e:
             logger.error(f"Error checking book availability: {str(e)}")
@@ -307,7 +300,7 @@ class ActiveReservationsHandler(BaseHandler):
             })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(411)
             self.write({"error": "Invalid user ID format"})
         except Exception as e:
             logger.error(f"Error fetching active reservations: {str(e)}")
@@ -365,7 +358,7 @@ class UserHandler(BaseHandler):
                 })
 
         except ValueError:
-            self.set_status(400)
+            self.set_status(412)
             self.write({"error": "Invalid user ID format"})
         except Exception as e:
             logger.error(f"Error fetching users: {str(e)}")
@@ -379,7 +372,7 @@ class UserHandler(BaseHandler):
 
             # Validate required fields
             if 'username' not in data:
-                self.set_status(400)
+                self.set_status(413)
                 self.write({"error": "Missing required field: username"})
                 return
 
@@ -401,7 +394,7 @@ class UserHandler(BaseHandler):
             })
 
         except json.JSONDecodeError:
-            self.set_status(400)
+            self.set_status(414)
             self.write({"error": "Invalid JSON"})
         except Exception as e:
             logger.error(f"Error creating user: {str(e)}")
