@@ -121,7 +121,7 @@ function App() {
             </div>
 
             {/* Create Reservation Section */}
-            <div className="bg-neutral-800 shadow-lg rounded-lg p-6 flex flex-col items-center">
+            <div className="p-6 flex flex-col items-center">
               <button
                 className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 ease-in-out
                   ${selectedUserId && selectedBookId && !isCreatingReservation
@@ -131,7 +131,7 @@ function App() {
                 onClick={handleCreateReservation}
                 disabled={!selectedUserId || !selectedBookId || isCreatingReservation}
               >
-                {isCreatingReservation ? "Creating Reservation..." : "Create Reservation"}
+                {isCreatingReservation ? "Checking out..." : "Check out"}
               </button>
 
               {reservationMessage && (
