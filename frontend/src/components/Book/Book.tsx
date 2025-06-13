@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBookById } from "../../services/bookService";
+import { formatDate } from "../../utils/dateUtils";
 
 interface BookProps {
   id: string | null;
@@ -34,7 +35,7 @@ const Book: React.FC<BookProps> = ({ id }) => {
       <h2>Book Details</h2>
       <p><strong>Title:</strong> {data?.title}</p>
       <p><strong>Status:</strong> {data?.status}</p>
-      <p><strong>Created At:</strong> {data?.created_at}</p>
+      <p><strong>Created At:</strong> {formatDate(data?.created_at)}</p>
     </div>
   );
 };
