@@ -4,19 +4,20 @@ import { useState } from "react";
 import { fetchBooks } from "../../services/bookService";
 
 interface BookListProps {
-  onSelectBook: (userId: number) => void;
+  onSelectBook: (userId: string) => void;
 }
 
 const BookList: React.FC<BookListProps> = ({ onSelectBook }) => {
-  const { data: books, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["books"],
-    queryFn: fetchBooks,
+    queryFn: () => fetchBooks(),
   });
   const [searchInput, setSearchInput] = useState("");
 
   if (isLoading) return <p>Loading books...</p>;
   if (error) return <p>Error loading books: {error.message}</p>;
 
+  const books = data?.books;
   const filteredBooks = books?.filter(book =>
     book.title.toLowerCase().includes(searchInput.toLowerCase())
   ) || [];
@@ -35,9 +36,9 @@ const BookList: React.FC<BookListProps> = ({ onSelectBook }) => {
       <ul className="user-list__items">
         {filteredBooks.map(book => (
           <li
-            key={book.id}
+            key={book.book_id}
             className="user-list__item"
-            onClick={() => onSelectBook(book.id)}
+            onClick={() => onSelectBook(book.book_id)}
           >
             {book.title}
           </li>

@@ -5,15 +5,15 @@ import UserList from "./components/UserList";
 import BookList from "./components/BookList";
 
 function App() {
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [tab, setTab] = useState<"users" | "books">("users");
 
-  const handleSelectUserId = (userId: number) => {
+  const handleSelectUserId = (userId: string) => {
     setSelectedUserId(userId);
   };
 
-  const handleSelectBookId = (bookId: number) => {
+  const handleSelectBookId = (bookId: string) => {
     setSelectedBookId(bookId);
   };
 

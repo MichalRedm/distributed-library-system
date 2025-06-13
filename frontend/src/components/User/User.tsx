@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 interface UserProps {
-  id: number | null;
+  id: string | null;
 }
 
 const User: React.FC<UserProps> = ({ id }) => {

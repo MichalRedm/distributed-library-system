@@ -4,11 +4,11 @@ import { fetchUsers } from "../../services/userService";
 import { useState } from "react";
 
 interface UserListProps {
-  onSelectUser: (userId: number) => void;
+  onSelectUser: (userId: string) => void;
 }
 
 const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
-  const { data: users, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: fetchUsers,
   });
@@ -17,6 +17,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
   if (isLoading) return <p>Loading users...</p>;
   if (error) return <p>Error loading users: {error.message}</p>;
 
+  const users = data?.users;
   const filteredUsers = users?.filter(user =>
     user.username.toLowerCase().includes(searchInput.toLowerCase())
   ) || [];
@@ -35,9 +36,9 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
       <ul className="user-list__items">
         {filteredUsers.map(user => (
           <li
-            key={user.id}
+            key={user.user_id}
             className="user-list__item"
-            onClick={() => onSelectUser(user.id)}
+            onClick={() => onSelectUser(user.user_id)}
           >
             {user.username}
           </li>
