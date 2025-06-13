@@ -4,10 +4,11 @@ import SelectableList from "../SelectableList/SelectableList";
 import type { User } from "../../types/user";
 
 interface UserListProps {
+  selectedUserId: string | null;
   onSelectUser: (userId: string) => void;
 }
 
-const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
+const UserList: React.FC<UserListProps> = ({ selectedUserId, onSelectUser }) => {
   const { data, error, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: fetchUsers,
@@ -17,7 +18,6 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
 
   return (
     <div>
-      <h2>Users</h2>
       <SelectableList<User>
         data={users}
         isLoading={isLoading}
@@ -26,6 +26,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
         extractLabel={(user) => user.username}
         onSelect={onSelectUser}
         searchPlaceholder="Search users..."
+        selectedId={selectedUserId}
       />
     </div>
   );

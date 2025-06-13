@@ -5,6 +5,7 @@ import UserList from "./components/UserList";
 import BookList from "./components/BookList";
 import Book from "./components/Book";
 import { createReservation } from "./services/reservationService"; // Import the createReservation function
+import { useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
 
 function App() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -13,6 +14,8 @@ function App() {
   const [isCreatingReservation, setIsCreatingReservation] = useState<boolean>(false);
   const [reservationMessage, setReservationMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState<boolean>(false);
+
+  const queryClient = useQueryClient(); // Initialize useQueryClient
 
   const handleSelectUserId = (userId: string) => {
     setSelectedUserId(userId);
@@ -43,9 +46,14 @@ function App() {
         });
         setReservationMessage(`Reservation created successfully! ID: ${reservation.reservation_id}`);
         setIsError(false);
-        // Optionally, reset selected user/book or refresh relevant lists
-        setSelectedUserId(null);
-        setSelectedBookId(null);
+
+        // Invalidate the specific user's reservations query
+        // This will cause the User component to refetch its reservations
+        queryClient.invalidateQueries({ queryKey: ["user-reservations", selectedUserId] });
+
+        // Do NOT reset selected user/book here, as requested
+        // setSelectedUserId(null);
+        // setSelectedBookId(null);
       } catch (error) {
         console.error("Failed to create reservation:", error);
         setReservationMessage("Failed to create reservation. Please try again.");
@@ -59,36 +67,37 @@ function App() {
   return (
     <div className="App flex flex-col items-center p-4 min-h-screen bg-neutral-900 font-sans text-neutral-300">
       <div className="w-full max-w-4xl bg-neutral-800 shadow-lg rounded-lg p-6 mb-8">
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-6 space-x-4">
-          <button
-            className={`tab-button px-6 py-3 rounded-lg text-lg font-medium transition-colors duration-200
-              ${tab === "users" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
-            onClick={() => {
-              setTab("users");
-              setReservationMessage(null);
-              setIsError(false);
-            }}
-          >
-            Users
-          </button>
-          <button
-            className={`tab-button px-6 py-3 rounded-lg text-lg font-medium transition-colors duration-200
-              ${tab === "books" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
-            onClick={() => {
-              setTab("books");
-              setReservationMessage(null);
-              setIsError(false);
-            }}
-          >
-            Books
-          </button>
-        </div>
-
         {/* Main Content Area: Two Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column: User or Book List */}
-          <div className="bg-neutral-700 p-4 rounded-lg shadow-inner">
+          {/* Left Column: Tab Navigation and User or Book List */}
+          <div className="bg-neutral-700 p-4 rounded-lg shadow-inner flex flex-col">
+            {/* Tab Navigation moved here */}
+            <div className="flex justify-center mb-6 space-x-4">
+              <button
+                className={`tab-button px-6 py-3 rounded-lg text-lg font-medium transition-colors duration-200
+                  ${tab === "users" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
+                onClick={() => {
+                  setTab("users");
+                  setReservationMessage(null);
+                  setIsError(false);
+                }}
+              >
+                Users
+              </button>
+              <button
+                className={`tab-button px-6 py-3 rounded-lg text-lg font-medium transition-colors duration-200
+                  ${tab === "books" ? "bg-blue-600 text-white shadow-md" : "bg-neutral-600 text-neutral-300 hover:bg-neutral-500"}`}
+                onClick={() => {
+                  setTab("books");
+                  setReservationMessage(null);
+                  setIsError(false);
+                }}
+              >
+                Books
+              </button>
+            </div>
+
+            {/* User or Book List */}
             {tab === "users" && (
               <UserList onSelectUser={handleSelectUserId} selectedUserId={selectedUserId} />
             )}

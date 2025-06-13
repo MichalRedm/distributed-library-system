@@ -4,10 +4,11 @@ import SelectableList from "../SelectableList/SelectableList";
 import type { Book } from "../../types/book";
 
 interface BookListProps {
+  selectedBookId: string | null;
   onSelectBook: (bookId: string) => void;
 }
 
-const BookList: React.FC<BookListProps> = ({ onSelectBook }) => {
+const BookList: React.FC<BookListProps> = ({ selectedBookId, onSelectBook }) => {
   const { data, error, isLoading } = useQuery({
     queryKey: ["books"],
     queryFn: () => fetchBooks(),
@@ -17,7 +18,6 @@ const BookList: React.FC<BookListProps> = ({ onSelectBook }) => {
 
   return (
     <div>
-      <h2>Books</h2>
       <SelectableList<Book>
         data={books}
         isLoading={isLoading}
@@ -26,6 +26,7 @@ const BookList: React.FC<BookListProps> = ({ onSelectBook }) => {
         extractLabel={(book) => book.title}
         onSelect={onSelectBook}
         searchPlaceholder="Search books..."
+        selectedId={selectedBookId}
       />
     </div>
   );
