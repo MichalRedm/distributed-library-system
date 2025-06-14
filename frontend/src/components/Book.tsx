@@ -71,7 +71,7 @@ const Book: React.FC<BookProps> = ({ id }) => {
 
   if (!id) {
     return (
-      <div className="p-4 bg-neutral-700 rounded-lg text-neutral-400 text-center">
+      <div className="p-4 bg-neutral-700 rounded-lg text-neutral-400 text-center min-h-full">
         <FontAwesomeIcon icon={faBook} className="text-5xl mb-3 text-neutral-500" /> {/* Book Icon */}
         <p className="text-xl font-semibold mb-2 text-neutral-200">Select a book</p>
         <p>Please select a book to view its details.</p>
@@ -94,7 +94,7 @@ const Book: React.FC<BookProps> = ({ id }) => {
   });
 
   return (
-    <div className="book p-4 bg-neutral-700 rounded-lg shadow-inner">
+    <div className="book p-4 bg-neutral-700 rounded-lg shadow-inner min-h-full">
       <div className="flex items-center mb-4">
         <FontAwesomeIcon icon={faBookOpen} className="text-5xl mr-4 text-neutral-400" /> {/* Book Icon */}
         <h2 className="text-3xl font-bold text-neutral-100">{bookData?.title}</h2> {/* Book title as heading */}

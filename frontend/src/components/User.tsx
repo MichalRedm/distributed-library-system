@@ -68,7 +68,7 @@ const User: React.FC<UserProps> = ({ id }) => {
 
   if (!id) {
     return (
-      <div className="p-4 bg-neutral-700 rounded-lg text-neutral-400 text-center">
+      <div className="p-4 bg-neutral-700 rounded-lg text-neutral-400 text-center min-h-full">
         <FontAwesomeIcon icon={faUser} className="text-5xl mb-3 text-neutral-500" /> {/* User Icon */}
         <p className="text-xl font-semibold mb-2 text-neutral-200">Select a user</p>
         <p>Please select a user to view their profile.</p>
@@ -91,7 +91,7 @@ const User: React.FC<UserProps> = ({ id }) => {
   });
 
   return (
-    <div className="user p-4 bg-neutral-700 rounded-lg shadow-inner">
+    <div className="user p-4 bg-neutral-700 rounded-lg shadow-inner min-h-full">
       <div className="flex items-center mb-4">
         <FontAwesomeIcon icon={faUserCircle} className="text-5xl mr-4 text-neutral-400" /> {/* User Icon */}
         <h2 className="text-3xl font-bold text-neutral-100">{user?.username}</h2> {/* Username as heading */}
