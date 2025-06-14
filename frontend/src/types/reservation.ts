@@ -5,6 +5,7 @@ export type ReservationStatus = "active" | "completed";
 
 /**
  * Defines the structure for a single reservation object.
+ * Note: created_at and updated_at are optional as they may not be returned by all reservation list endpoints.
  */
 export interface Reservation {
   reservation_id: string;
@@ -15,8 +16,8 @@ export interface Reservation {
   status: ReservationStatus;
   reservation_date: string; // ISO8601 timestamp (e.g., "2023-10-27T10:00:00Z")
   return_deadline: string; // ISO8601 timestamp
-  created_at: string; // ISO8601 timestamp
-  updated_at: string; // ISO8601 timestamp
+  created_at?: string; // ISO8601 timestamp - Made optional
+  updated_at?: string; // ISO8601 timestamp - Made optional
 }
 
 /**
