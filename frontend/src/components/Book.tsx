@@ -101,9 +101,9 @@ const Book: React.FC<BookProps> = ({ id }) => {
       </div>
 
       <p className="mb-1"><strong className="text-neutral-300">Status:</strong> <span className={`${bookData?.status === 'available' ? 'text-green-400' : 'text-orange-400'}`}>{bookData?.status}</span></p>
-      <p><strong className="text-neutral-300">Created At:</strong> {formatDate(bookData?.created_at)}</p>
+      <p><strong className="text-neutral-300">Created at:</strong> {formatDate(bookData?.created_at)}</p>
 
-      <h3 className="text-xl font-semibold mb-3 text-neutral-200 border-b border-neutral-600 pb-2 mt-6">Reservations for this Book</h3>
+      <h3 className="text-xl font-semibold mb-3 text-neutral-200 border-b border-neutral-600 pb-2 mt-6">Reservations for this book</h3>
       {sortedReservations.length === 0 ? (
         <p className="text-neutral-400">No reservations found for this book.</p>
       ) : (
@@ -125,8 +125,8 @@ const Book: React.FC<BookProps> = ({ id }) => {
               </div>
               {openReservationId === reservation.reservation_id && (
                 <div className="mt-2 text-neutral-300 space-y-1 text-sm border-t border-neutral-700 pt-2">
-                  <p><strong className="text-neutral-300">Reservation Date:</strong> {formatDate(reservation.reservation_date)}</p>
-                  <p><strong className="text-neutral-300">Return Deadline:</strong> {formatDate(reservation.return_deadline)}</p>
+                  <p><strong className="text-neutral-300">Reservation date:</strong> {formatDate(reservation.reservation_date)}</p>
+                  <p><strong className="text-neutral-300">Return deadline:</strong> {formatDate(reservation.return_deadline)}</p>
 
                   {reservation.status === 'active' && (
                     <button

@@ -97,7 +97,7 @@ const User: React.FC<UserProps> = ({ id }) => {
         <h2 className="text-3xl font-bold text-neutral-100">{user?.username}</h2> {/* Username as heading */}
       </div>
 
-      <p className="mb-3 text-neutral-400 text-sm"><strong className="text-neutral-300">Member Since:</strong> {formatDate(user?.created_at)}</p>
+      <p className="mb-3 text-neutral-400 text-sm"><strong className="text-neutral-300">Member since:</strong> {formatDate(user?.created_at)}</p>
 
       <h3 className="text-xl font-semibold mb-3 text-neutral-200 border-b border-neutral-600 pb-2">Reservations</h3>
       {sortedReservations.length === 0 ? (
@@ -121,8 +121,8 @@ const User: React.FC<UserProps> = ({ id }) => {
               </div>
               {openReservationId === reservation.reservation_id && (
                 <div className="mt-2 text-neutral-300 space-y-1 text-sm border-t border-neutral-700 pt-2">
-                  <p><strong className="text-neutral-300">Reservation Date:</strong> {formatDate(reservation.reservation_date)}</p>
-                  <p><strong className="text-neutral-300">Return Deadline:</strong> {formatDate(reservation.return_deadline)}</p>
+                  <p><strong className="text-neutral-300">Reservation date:</strong> {formatDate(reservation.reservation_date)}</p>
+                  <p><strong className="text-neutral-300">Return deadline:</strong> {formatDate(reservation.return_deadline)}</p>
 
                   {reservation.status === 'active' && (
                     <button
