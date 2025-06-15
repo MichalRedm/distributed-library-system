@@ -309,21 +309,51 @@ class ReservationDetailHandler(BaseHandler):
                     )
                     await execute_async(update_book, (reservation.book_id,))
 
-            # If updating return_deadline and reservation is still active,
-            # update the active table too
-            if 'return_deadline' in updates and reservation.status == 'active':
-                update_active_deadline = (
-                    "UPDATE reservations_user_book SET return_deadline = %s "
-                    "WHERE user_id = %s AND book_id = %s"
+            # Update return_deadline in ALL tables that contain it
+            if 'return_deadline' in updates:
+                # Update reservations_by_user table
+                update_by_user_deadline = (
+                    "UPDATE reservations_by_user SET return_deadline = %s "
+                    "WHERE user_id = %s AND reservation_id = %s"
                 )
                 await execute_async(
-                    update_active_deadline,
+                    update_by_user_deadline,
                     (
                         updates['return_deadline'],
                         reservation.user_id,
-                        reservation.book_id
+                        reservation_uuid
                     )
                 )
+
+                # Update reservations_by_book table
+                update_by_book_deadline = (
+                    "UPDATE reservations_by_book SET return_deadline = %s "
+                    "WHERE book_id = %s AND reservation_id = %s"
+                )
+                await execute_async(
+                    update_by_book_deadline,
+                    (
+                        updates['return_deadline'],
+                        reservation.book_id,
+                        reservation_uuid
+                    )
+                )
+
+                # If reservation is still active, update the active table too
+                if reservation.status == 'active':
+                    update_active_deadline = (
+                        "UPDATE reservations_user_book "
+                        "SET return_deadline = %s "
+                        "WHERE user_id = %s AND book_id = %s"
+                    )
+                    await execute_async(
+                        update_active_deadline,
+                        (
+                            updates['return_deadline'],
+                            reservation.user_id,
+                            reservation.book_id
+                        )
+                    )
 
             # Return updated reservation
             updated_reservation = await execute_async(
