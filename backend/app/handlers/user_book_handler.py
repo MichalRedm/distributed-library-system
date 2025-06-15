@@ -4,6 +4,7 @@ from datetime import datetime
 from handlers.base_handler import BaseHandler
 from db.cassandra import execute_async  # type: ignore
 import logging
+from consistency_checker import mark_write_activity
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +177,7 @@ class BookHandler(BaseHandler):
                 "status": "available",
                 "created_at": now.isoformat()
             })
+            mark_write_activity()
 
         except json.JSONDecodeError:
             self.set_status(409)
@@ -361,6 +363,7 @@ class UserHandler(BaseHandler):
                 "username": data['username'],
                 "created_at": now.isoformat()
             })
+            mark_write_activity()
 
         except json.JSONDecodeError:
             self.set_status(414)

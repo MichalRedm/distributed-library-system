@@ -4,6 +4,7 @@ import tornado.web
 import tornado.platform.asyncio
 import logging
 import sys
+from consistency_checker import start_consistency_checker, stop_consistency_checker
 
 from handlers.reservation_handler import (
     ReservationHandler,
@@ -54,6 +55,8 @@ def make_app() -> tornado.web.Application:
 async def main():
     try:
         await init_cassandra()
+
+        await start_consistency_checker()
 
         app = make_app()
         app.listen(PORT)
@@ -119,6 +122,13 @@ async def main():
     except Exception as e:
         logging.error(f"Failed to start server: {e}")
         raise
+    finally:
+        # Stop the consistency checker when shutting down
+        try:
+            await stop_consistency_checker()
+        except Exception:
+            pass
+
 
 
 if __name__ == "__main__":
