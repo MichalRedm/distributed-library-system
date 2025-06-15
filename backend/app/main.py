@@ -4,7 +4,10 @@ import tornado.web
 import tornado.platform.asyncio
 import logging
 import sys
-from consistency_checker import start_consistency_checker, stop_consistency_checker
+from consistency_checker import (
+  start_consistency_checker,
+  stop_consistency_checker
+)
 
 from handlers.reservation_handler import (
     ReservationHandler,
@@ -128,7 +131,6 @@ async def main():
             await stop_consistency_checker()
         except Exception:
             pass
-
 
 
 if __name__ == "__main__":
