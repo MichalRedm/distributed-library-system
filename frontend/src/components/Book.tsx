@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBookById, fetchBookReservations } from "../services/bookService";
 import { formatDate } from "../utils/dateUtils";
@@ -15,12 +14,6 @@ interface BookProps {
 }
 
 const Book: React.FC<BookProps> = ({ id }) => {
-  useEffect(() => {
-    if (id) {
-      console.log("Loading book with ID:", id);
-    }
-  }, [id]);
-
   const { data: bookData, error: bookError, isLoading: bookLoading } = useQuery({
     queryKey: ["book", id],
     queryFn: () => {
