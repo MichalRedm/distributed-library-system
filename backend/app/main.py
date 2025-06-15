@@ -3,6 +3,7 @@ import os
 import tornado.web
 import tornado.platform.asyncio
 import logging
+import sys
 
 from handlers.reservation_handler import (
     ReservationHandler,
@@ -17,6 +18,8 @@ from handlers.user_book_handler import (
     ActiveReservationsHandler
 )
 from db.cassandra import init_cassandra, close_cassandra
+
+sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
 
 PORT = int(os.environ.get("PORT", 8000))
 
