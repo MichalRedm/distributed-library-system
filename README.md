@@ -2,6 +2,7 @@
 
 **A fault-tolerant, scalable reservation platform for managing library resources, built with modern web technologies and a distributed Cassandra backend.**
 
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![React Frontend CI](https://github.com/MichalRedm/distributed-library-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/MichalRedm/distributed-library-system/actions/workflows/frontend-ci.yml)
 [![Backend Python Application](https://github.com/MichalRedm/bigdata-distributed-app/actions/workflows/python-app.yml/badge.svg)](https://github.com/MichalRedm/bigdata-distributed-app/actions/workflows/python-app.yml)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.10%20%7C%20Tornado-blue?logo=python)](https://www.python.org/downloads/release/python-3100/)
@@ -164,4 +165,4 @@ bigdata-distributed-app/
 
 ## 📜 License
 
-This project is part of the **Big Data and Distributed Processing** course at Poznań University of Technology and is not licensed for commercial use.
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0). You may share and adapt this work for non-commercial purposes, provided that appropriate credit is given.
